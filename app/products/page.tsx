@@ -159,14 +159,21 @@ export default function ProductsPage() {
           stone_type:stone_types(*)
         `)
         .eq('visible', true)
-        .order('created_at', { ascending: false })
 
       if (typesError) throw typesError
       if (productsError) throw productsError
 
+      // Sort products by display_order on the client side
+      const sortedProducts = (productsData || []).sort((a: any, b: any) => {
+        const orderA = a.display_order ?? 999
+        const orderB = b.display_order ?? 999
+        if (orderA !== orderB) return orderA - orderB
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      })
+
       // Use database data if available, otherwise use fallback
       setStoneTypes(typesData && typesData.length > 0 ? typesData : fallbackStoneTypes)
-      setProducts(productsData && productsData.length > 0 ? productsData : fallbackProducts)
+      setProducts(sortedProducts.length > 0 ? sortedProducts : fallbackProducts)
     } catch (error) {
       console.error('Error fetching products:', error)
       // Use fallback data on error

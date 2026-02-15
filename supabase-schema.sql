@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS projects (
   image_url TEXT NOT NULL,
   video_url TEXT,
   category TEXT NOT NULL CHECK (category IN ('residential', 'commercial', 'hospitality', 'luxury')),
+  display_order INTEGER DEFAULT 0,
   visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS testimonials (
   content TEXT NOT NULL,
   rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
   project_type TEXT NOT NULL CHECK (project_type IN ('residential', 'commercial', 'hospitality', 'luxury')),
+  display_order INTEGER DEFAULT 0,
   visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
@@ -95,6 +97,7 @@ CREATE TABLE IF NOT EXISTS products (
   origin TEXT NOT NULL,
   features TEXT[] DEFAULT '{}',
   customizable BOOLEAN DEFAULT true,
+  display_order INTEGER DEFAULT 0,
   visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
@@ -221,3 +224,11 @@ INSERT INTO products (name, description, image_url, stone_type_id, origin, featu
   true,
   true
 );
+
+-- ============================================
+-- MIGRATION: Run this if tables already exist
+-- Adds display_order column to existing tables
+-- ============================================
+-- ALTER TABLE projects ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
+-- ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;

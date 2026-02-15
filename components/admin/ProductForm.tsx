@@ -2,49 +2,60 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X, Plus, Trash2 } from 'lucide-react'
 import { adminApi } from '@/lib/adminApi'
 
-interface ProjectFormProps {
-  project?: any
+interface ProductFormProps {
+  product?: any
+  stoneTypes: any[]
   onClose: () => void
   onSave: () => void
 }
 
-export default function ProjectForm({ project, onClose, onSave }: ProjectFormProps) {
+export default function ProductForm({ product, stoneTypes, onClose, onSave }: ProductFormProps) {
   const [formData, setFormData] = useState({
-    title: '',
-    location: '',
+    name: '',
     description: '',
     image_url: '',
-    video_url: '',
-    category: 'luxury',
+    stone_type_id: '',
+    origin: '',
+    features: [''],
+    customizable: true,
     display_order: 0,
     visible: true,
   })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (project) {
-      setFormData(project)
+    if (product) {
+      setFormData({
+        ...product,
+        features: product.features && product.features.length > 0 ? product.features : [''],
+      })
     }
-  }, [project])
+  }, [product])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      if (project) {
-        await adminApi('update', 'projects', formData, project.id)
+      const dataToSave = {
+        ...formData,
+        features: formData.features.filter(f => f.trim() !== ''),
+        stone_type_id: formData.stone_type_id || null,
+      }
+
+      if (product) {
+        await adminApi('update', 'products', dataToSave, product.id)
       } else {
-        await adminApi('insert', 'projects', formData)
+        await adminApi('insert', 'products', dataToSave)
       }
 
       onSave()
     } catch (error) {
-      console.error('Error saving project:', error)
-      alert('Failed to save project')
+      console.error('Error saving product:', error)
+      alert('Failed to save product')
     } finally {
       setLoading(false)
     }
@@ -59,6 +70,25 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
         : name === 'display_order' 
           ? parseInt(value) || 0 
           : value
+    }))
+  }
+
+  const handleFeatureChange = (index: number, value: string) => {
+    setFormData(prev => {
+      const newFeatures = [...prev.features]
+      newFeatures[index] = value
+      return { ...prev, features: newFeatures }
+    })
+  }
+
+  const addFeature = () => {
+    setFormData(prev => ({ ...prev, features: [...prev.features, ''] }))
+  }
+
+  const removeFeature = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index),
     }))
   }
 
@@ -77,7 +107,7 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
       >
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
           <h2 className="text-2xl font-serif font-bold text-charcoal">
-            {project ? 'Edit Project' : 'Add New Project'}
+            {product ? 'Edit Product' : 'Add New Product'}
           </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-charcoal">
             <X size={24} />
@@ -87,29 +117,16 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
-              Project Title *
+              Product Name *
             </label>
             <input
               type="text"
-              name="title"
+              name="name"
               required
-              value={formData.title}
+              value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-charcoal mb-2">
-              Location *
-            </label>
-            <input
-              type="text"
-              name="location"
-              required
-              value={formData.location}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+              placeholder="e.g. Makrana White Marble"
             />
           </div>
 
@@ -124,6 +141,7 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
               value={formData.description}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none resize-none"
+              placeholder="Describe the product..."
             />
           </div>
 
@@ -144,34 +162,73 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
 
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
-              Video URL (Optional)
+              Stone Type *
             </label>
-            <input
-              type="url"
-              name="video_url"
-              value={formData.video_url}
+            <select
+              name="stone_type_id"
+              required
+              value={formData.stone_type_id}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
-              placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+            >
+              <option value="">Select a stone type...</option>
+              {stoneTypes.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-charcoal mb-2">
+              Origin *
+            </label>
+            <input
+              type="text"
+              name="origin"
+              required
+              value={formData.origin}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+              placeholder="e.g. Makrana, Rajasthan"
             />
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
-              Category *
+              Features
             </label>
-            <select
-              name="category"
-              required
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
-            >
-              <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
-              <option value="hospitality">Hospitality</option>
-              <option value="luxury">Luxury</option>
-            </select>
+            <div className="space-y-2">
+              {formData.features.map((feature, index) => (
+                <div key={index} className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={feature}
+                    onChange={(e) => handleFeatureChange(index, e.target.value)}
+                    className="flex-1 px-4 py-2 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                    placeholder={`Feature ${index + 1}`}
+                  />
+                  {formData.features.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeFeature(index)}
+                      className="px-3 py-2 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addFeature}
+                className="flex items-center space-x-1 text-sm text-gold hover:text-gold-light font-semibold"
+              >
+                <Plus size={16} />
+                <span>Add Feature</span>
+              </button>
+            </div>
           </div>
 
           <div>
@@ -189,18 +246,34 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
             <p className="text-xs text-gray-500 mt-1">Lower numbers appear first on the page.</p>
           </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="visible"
-              name="visible"
-              checked={formData.visible}
-              onChange={handleChange}
-              className="w-4 h-4 text-gold border-gray-300 focus:ring-gold"
-            />
-            <label htmlFor="visible" className="ml-2 text-sm font-semibold text-charcoal">
-              Visible on website
-            </label>
+          <div className="flex items-center space-x-6">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="customizable"
+                name="customizable"
+                checked={formData.customizable}
+                onChange={handleChange}
+                className="w-4 h-4 text-gold border-gray-300 focus:ring-gold"
+              />
+              <label htmlFor="customizable" className="ml-2 text-sm font-semibold text-charcoal">
+                Customizable
+              </label>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="visible"
+                name="visible"
+                checked={formData.visible}
+                onChange={handleChange}
+                className="w-4 h-4 text-gold border-gray-300 focus:ring-gold"
+              />
+              <label htmlFor="visible" className="ml-2 text-sm font-semibold text-charcoal">
+                Visible on website
+              </label>
+            </div>
           </div>
 
           <div className="flex space-x-4 pt-4">
@@ -216,7 +289,7 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
               disabled={loading}
               className="flex-1 px-6 py-3 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-colors disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save Project'}
+              {loading ? 'Saving...' : 'Save Product'}
             </button>
           </div>
         </form>

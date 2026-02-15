@@ -5,61 +5,69 @@ import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { adminApi } from '@/lib/adminApi'
 
-interface ProjectFormProps {
-  project?: any
+interface StoneTypeFormProps {
+  stoneType?: any
   onClose: () => void
   onSave: () => void
 }
 
-export default function ProjectForm({ project, onClose, onSave }: ProjectFormProps) {
+export default function StoneTypeForm({ stoneType, onClose, onSave }: StoneTypeFormProps) {
   const [formData, setFormData] = useState({
-    title: '',
-    location: '',
+    name: '',
+    slug: '',
     description: '',
-    image_url: '',
-    video_url: '',
-    category: 'luxury',
     display_order: 0,
     visible: true,
   })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (project) {
-      setFormData(project)
+    if (stoneType) {
+      setFormData(stoneType)
     }
-  }, [project])
+  }, [stoneType])
+
+  const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      if (project) {
-        await adminApi('update', 'projects', formData, project.id)
+      const dataToSave = {
+        ...formData,
+        slug: formData.slug || generateSlug(formData.name),
+      }
+
+      if (stoneType) {
+        await adminApi('update', 'stone_types', dataToSave, stoneType.id)
       } else {
-        await adminApi('insert', 'projects', formData)
+        await adminApi('insert', 'stone_types', dataToSave)
       }
 
       onSave()
     } catch (error) {
-      console.error('Error saving project:', error)
-      alert('Failed to save project')
+      console.error('Error saving stone type:', error)
+      alert('Failed to save stone type')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' 
-        ? (e.target as HTMLInputElement).checked 
-        : name === 'display_order' 
-          ? parseInt(value) || 0 
-          : value
-    }))
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : 
+                     name === 'display_order' ? parseInt(value) || 0 : value
+
+    setFormData(prev => {
+      const updated = { ...prev, [name]: newValue }
+      if (name === 'name' && !stoneType) {
+        updated.slug = generateSlug(value)
+      }
+      return updated
+    })
   }
 
   return (
@@ -72,12 +80,12 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
       <motion.div
         initial={{ scale: 0.95 }}
         animate={{ scale: 1 }}
-        className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
           <h2 className="text-2xl font-serif font-bold text-charcoal">
-            {project ? 'Edit Project' : 'Add New Project'}
+            {stoneType ? 'Edit Stone Type' : 'Add New Stone Type'}
           </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-charcoal">
             <X size={24} />
@@ -87,91 +95,46 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
-              Project Title *
+              Name *
             </label>
             <input
               type="text"
-              name="title"
+              name="name"
               required
-              value={formData.title}
+              value={formData.name}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+              placeholder="e.g. White Marble"
             />
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
-              Location *
+              Slug
             </label>
             <input
               type="text"
-              name="location"
-              required
-              value={formData.location}
+              name="slug"
+              value={formData.slug}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none bg-gray-50"
+              placeholder="Auto-generated from name"
             />
+            <p className="text-xs text-gray-500 mt-1">Used in URLs and filtering. Auto-generated if left empty.</p>
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
-              Description *
+              Description
             </label>
             <textarea
               name="description"
-              required
-              rows={4}
+              rows={3}
               value={formData.description}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none resize-none"
+              placeholder="Brief description of this stone type"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-charcoal mb-2">
-              Image URL *
-            </label>
-            <input
-              type="url"
-              name="image_url"
-              required
-              value={formData.image_url}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-charcoal mb-2">
-              Video URL (Optional)
-            </label>
-            <input
-              type="url"
-              name="video_url"
-              value={formData.video_url}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
-              placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-charcoal mb-2">
-              Category *
-            </label>
-            <select
-              name="category"
-              required
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
-            >
-              <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
-              <option value="hospitality">Hospitality</option>
-              <option value="luxury">Luxury</option>
-            </select>
           </div>
 
           <div>
@@ -186,7 +149,7 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
               className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
               min={0}
             />
-            <p className="text-xs text-gray-500 mt-1">Lower numbers appear first on the page.</p>
+            <p className="text-xs text-gray-500 mt-1">Lower numbers appear first in the filter bar.</p>
           </div>
 
           <div className="flex items-center">
@@ -216,7 +179,7 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
               disabled={loading}
               className="flex-1 px-6 py-3 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-colors disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save Project'}
+              {loading ? 'Saving...' : 'Save Stone Type'}
             </button>
           </div>
         </form>

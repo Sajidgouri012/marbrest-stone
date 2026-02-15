@@ -104,6 +104,7 @@ export default function TestimonialsPage() {
         .from('testimonials')
         .select('*')
         .eq('visible', true)
+        .order('display_order', { ascending: true })
         .order('created_at', { ascending: false })
 
       if (error) throw error

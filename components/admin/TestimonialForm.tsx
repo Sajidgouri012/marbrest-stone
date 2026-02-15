@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
-import { createClient } from '@/lib/supabase'
+import { adminApi } from '@/lib/adminApi'
 
 interface TestimonialFormProps {
   testimonial?: any
@@ -19,6 +19,7 @@ export default function TestimonialForm({ testimonial, onClose, onSave }: Testim
     content: '',
     rating: 5,
     project_type: 'luxury',
+    display_order: 0,
     visible: true,
   })
   const [loading, setLoading] = useState(false)
@@ -34,17 +35,10 @@ export default function TestimonialForm({ testimonial, onClose, onSave }: Testim
     setLoading(true)
 
     try {
-      const supabase = createClient()
-
       if (testimonial) {
-        await supabase
-          .from('testimonials')
-          .update(formData)
-          .eq('id', testimonial.id)
+        await adminApi('update', 'testimonials', formData, testimonial.id)
       } else {
-        await supabase
-          .from('testimonials')
-          .insert([formData])
+        await adminApi('insert', 'testimonials', formData)
       }
 
       onSave()
@@ -184,6 +178,21 @@ export default function TestimonialForm({ testimonial, onClose, onSave }: Testim
               <option value="hospitality">Hospitality</option>
               <option value="luxury">Luxury</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-charcoal mb-2">
+              Display Order
+            </label>
+            <input
+              type="number"
+              name="display_order"
+              value={formData.display_order}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+              min={0}
+            />
+            <p className="text-xs text-gray-500 mt-1">Lower numbers appear first on the page.</p>
           </div>
 
           <div className="flex items-center">
