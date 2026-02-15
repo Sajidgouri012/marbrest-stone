@@ -50,7 +50,7 @@ export default function FeaturedProjects() {
   }
 
   return (
-    <section ref={ref} className="py-32 px-6 lg:px-8 bg-gray-50">
+    <section ref={ref} className="py-12 md:py-16 px-6 lg:px-8 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

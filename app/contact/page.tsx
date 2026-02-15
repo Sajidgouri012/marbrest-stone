@@ -108,8 +108,8 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <div className="font-semibold text-charcoal mb-1">Phone</div>
-                    <a href="tel:+15551234567" className="text-gray-600 hover:text-gold transition-colors">
-                      +1 (555) 123-4567
+                    <a href="tel:+918000485312" className="text-gray-600 hover:text-gold transition-colors">
+                      +91 8000485312
                     </a>
                   </div>
                 </div>

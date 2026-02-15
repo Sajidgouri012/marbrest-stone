@@ -8,7 +8,7 @@ export default function CraftsmanshipVideo() {
   const [isPlaying, setIsPlaying] = useState(false)
 
   return (
-    <section className="py-20 md:py-32 bg-white">
+    <section className="py-12 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

@@ -10,7 +10,7 @@ export default function CTASection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
   return (
-    <section ref={ref} className="relative py-32 px-6 lg:px-8 overflow-hidden">
+    <section ref={ref} className="relative py-12 md:py-16 px-6 lg:px-8 overflow-hidden">
       <div className="absolute inset-0 bg-charcoal" />
       <div 
         className="absolute inset-0 opacity-10"
