@@ -49,12 +49,16 @@ export default function HeritageSection() {
               className="mt-10 grid grid-cols-3 gap-8"
             >
               <div>
-                <div className="text-4xl font-serif font-bold text-gold mb-2">500+</div>
+                <div className="text-4xl font-serif font-bold text-gold mb-2">600+</div>
                 <div className="text-sm text-gray-600 uppercase tracking-wide">Projects</div>
               </div>
-              <div>
+              {/* <div>
                 <div className="text-4xl font-serif font-bold text-gold mb-2">30+</div>
                 <div className="text-sm text-gray-600 uppercase tracking-wide">Countries</div>
+              </div> */}
+              <div>
+                <div className="text-4xl font-serif font-bold text-gold mb-2">30+</div>
+                <div className="text-sm text-gray-600 uppercase tracking-wide">Years Experience</div>
               </div>
               <div>
                 <div className="text-4xl font-serif font-bold text-gold mb-2">100%</div>
@@ -69,12 +73,12 @@ export default function HeritageSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative"
           >
-            <div className="relative h-[600px] w-full">
+            <div className="relative h-[700px] w-full">
               <div className="absolute inset-0 bg-gradient-to-br from-gold/20 to-transparent rounded-sm" />
               <img
-                src="https://images.unsplash.com/photo-1615873968403-89e068629265?q=80&w=1932&auto=format&fit=crop"
+                src="/crafting_sectioin_image.png"
                 alt="Luxury marble craftsmanship"
-                className="w-full h-full object-cover rounded-sm shadow-2xl"
+                className="w-full h-full object-contain rounded-sm shadow-2xl"
               />
               <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-charcoal rounded-sm -z-10" />
               <div className="absolute -top-6 -left-6 w-48 h-48 border-2 border-gold rounded-sm -z-10" />

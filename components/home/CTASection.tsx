@@ -58,7 +58,7 @@ export default function CTASection() {
           </motion.div>
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 1, delay: 0.6 }}
@@ -71,7 +71,7 @@ export default function CTASection() {
             <div className="text-white font-serif text-xl">ARMANI</div>
             <div className="text-white font-serif text-xl">VERSACE</div>
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </section>
   )

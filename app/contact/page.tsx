@@ -11,13 +11,35 @@ export default function ContactPage() {
     phone: '',
     company: '',
     projectType: '',
-    budget: '',
     message: '',
   })
+  const [phoneError, setPhoneError] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+
+  const validatePhone = (phone: string) => {
+    // Remove spaces and dashes
+    const cleaned = phone.replace(/[\s-]/g, '')
+    // Check if it's 10 digits (for most countries)
+    if (cleaned.length < 10 || cleaned.length > 15) {
+      return 'Phone number must be between 10-15 digits'
+    }
+    if (!/^\d+$/.test(cleaned)) {
+      return 'Phone number must contain only digits'
+    }
+    return ''
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate phone
+    const phoneValidation = validatePhone(formData.phone)
+    if (phoneValidation) {
+      setPhoneError(phoneValidation)
+      return
+    }
+    
+    setPhoneError('')
     setStatus('sending')
 
     try {
@@ -35,9 +57,9 @@ export default function ContactPage() {
           phone: '',
           company: '',
           projectType: '',
-          budget: '',
           message: '',
         })
+        setPhoneError('')
         setTimeout(() => setStatus('idle'), 5000)
       } else {
         setStatus('error')
@@ -48,9 +70,16 @@ export default function ContactPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    
+    // Clear phone error when user types
+    if (name === 'phone' && phoneError) {
+      setPhoneError('')
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }))
   }
 
@@ -179,22 +208,29 @@ export default function ContactPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="phone" className="block text-sm font-semibold text-charcoal mb-2">
-                      Phone Number
+                      Phone Number *
                     </label>
+                    <p className="text-xs text-gray-500 mb-2">Please include country extension (e.g., +91 )</p>
                     <input
                       type="tel"
                       id="phone"
                       name="phone"
+                      required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                      placeholder="+91 1234567890"
+                      className={`w-full px-4 py-3 border ${phoneError ? 'border-red-500' : 'border-gray-300'} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
                     />
+                    {phoneError && (
+                      <p className="text-red-500 text-sm mt-1">{phoneError}</p>
+                    )}
                   </div>
 
                   <div>
                     <label htmlFor="company" className="block text-sm font-semibold text-charcoal mb-2">
                       Company
                     </label>
+                    <div className="h-4 mb-2"></div>
                     <input
                       type="text"
                       id="company"
@@ -206,47 +242,25 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="projectType" className="block text-sm font-semibold text-charcoal mb-2">
-                      Project Type *
-                    </label>
-                    <select
-                      id="projectType"
-                      name="projectType"
-                      required
-                      value={formData.projectType}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
-                    >
-                      <option value="">Select a type</option>
-                      <option value="residential">Residential</option>
-                      <option value="commercial">Commercial</option>
-                      <option value="hospitality">Hospitality</option>
-                      <option value="luxury">Luxury Development</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="budget" className="block text-sm font-semibold text-charcoal mb-2">
-                      Budget Range
-                    </label>
-                    <select
-                      id="budget"
-                      name="budget"
-                      value={formData.budget}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
-                    >
-                      <option value="">Select a range</option>
-                      <option value="under-50k">Under $50,000</option>
-                      <option value="50k-100k">$50,000 - $100,000</option>
-                      <option value="100k-250k">$100,000 - $250,000</option>
-                      <option value="250k-500k">$250,000 - $500,000</option>
-                      <option value="over-500k">Over $500,000</option>
-                    </select>
-                  </div>
+                <div>
+                  <label htmlFor="projectType" className="block text-sm font-semibold text-charcoal mb-2">
+                    Project Type *
+                  </label>
+                  <select
+                    id="projectType"
+                    name="projectType"
+                    required
+                    value={formData.projectType}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                  >
+                    <option value="">Select a type</option>
+                    <option value="residential">Residential</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="hospitality">Hospitality</option>
+                    <option value="luxury">Luxury Development</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
 
                 <div>

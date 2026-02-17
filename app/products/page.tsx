@@ -34,6 +34,8 @@ export default function ProductsPage() {
   const [stoneTypes, setStoneTypes] = useState<StoneType[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [showCategories, setShowCategories] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Fallback stone types
   const fallbackStoneTypes: StoneType[] = [
@@ -144,6 +146,17 @@ export default function ProductsPage() {
     try {
       const supabase = createClient()
       
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('key', 'show_product_categories')
+        .single()
+      
+      if (settingsData) {
+        setShowCategories(settingsData.value === 'true')
+      }
+      
       // Fetch stone types
       const { data: typesData, error: typesError } = await supabase
         .from('stone_types')
@@ -186,12 +199,23 @@ export default function ProductsPage() {
 
   const categories = ['all', ...stoneTypes.map(t => t.slug)]
 
-  const filteredProducts = selectedCategory === 'all'
-    ? products
-    : products.filter(p => {
+  const filteredProducts = products
+    .filter(p => {
+      // Filter by category
+      if (selectedCategory !== 'all') {
         const stoneType = stoneTypes.find(t => t.id === p.stone_type_id)
-        return stoneType?.slug === selectedCategory
-      })
+        if (stoneType?.slug !== selectedCategory) return false
+      }
+      
+      // Filter by search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase()
+        return p.name.toLowerCase().includes(query) || 
+               p.description.toLowerCase().includes(query)
+      }
+      
+      return true
+    })
 
   return (
     <div className="min-h-screen pt-20">
@@ -218,34 +242,60 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      {/* Category Filter */}
+      {/* Search and Category Filter */}
       <section className="py-12 px-6 lg:px-8 bg-gray-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-4">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-6 py-2 font-semibold tracking-wide uppercase text-sm transition-all duration-300 ${
-                selectedCategory === 'all'
-                  ? 'bg-gold text-charcoal'
-                  : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
-              }`}
-            >
-              ALL
-            </button>
-            {stoneTypes.map((type) => (
+          {/* Search Bar */}
+          <div className="mb-8 max-w-2xl mx-auto">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products by name or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-6 py-4 pr-12 border-2 border-gray-300 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none text-charcoal placeholder-gray-400"
+              />
+              <svg
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Category Filter - conditionally shown */}
+          {showCategories && (
+            <div className="flex flex-wrap justify-center gap-4">
               <button
-                key={type.slug}
-                onClick={() => setSelectedCategory(type.slug)}
+                onClick={() => setSelectedCategory('all')}
                 className={`px-6 py-2 font-semibold tracking-wide uppercase text-sm transition-all duration-300 ${
-                  selectedCategory === type.slug
+                  selectedCategory === 'all'
                     ? 'bg-gold text-charcoal'
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                 }`}
               >
-                {type.name}
+                ALL
               </button>
-            ))}
-          </div>
+              {stoneTypes.map((type) => (
+                <button
+                  key={type.slug}
+                  onClick={() => setSelectedCategory(type.slug)}
+                  className={`px-6 py-2 font-semibold tracking-wide uppercase text-sm transition-all duration-300 ${
+                    selectedCategory === type.slug
+                      ? 'bg-gold text-charcoal'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                  }`}
+                >
+                  {type.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

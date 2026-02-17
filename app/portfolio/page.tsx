@@ -24,6 +24,7 @@ export default function PortfolioPage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showCategories, setShowCategories] = useState(true)
 
   const categories = ['all', 'residential', 'commercial', 'hospitality', 'luxury']
 
@@ -82,6 +83,19 @@ export default function PortfolioPage() {
   const fetchProjects = async () => {
     try {
       const supabase = createClient()
+      
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('settings')
+        .select('*')
+        .eq('key', 'show_portfolio_categories')
+        .single()
+      
+      if (settingsData) {
+        setShowCategories(settingsData.value === 'true')
+      }
+      
+      // Fetch projects
       const { data, error } = await supabase
         .from('projects')
         .select('*')
@@ -141,21 +155,23 @@ export default function PortfolioPage() {
 
       <section className="py-16 px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 font-semibold tracking-wide uppercase text-sm transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-gold text-charcoal'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+          {showCategories && (
+            <div className="flex flex-wrap justify-center gap-4 mb-12">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-6 py-2 font-semibold tracking-wide uppercase text-sm transition-all duration-300 ${
+                    selectedCategory === category
+                      ? 'bg-gold text-charcoal'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          )}
 
           {loading ? (
             <div className="text-center py-20">

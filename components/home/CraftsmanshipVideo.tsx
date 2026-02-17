@@ -137,18 +137,20 @@ export default function CraftsmanshipVideo() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+          // For 4 divs
+          // className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+          className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center"
         >
           <div>
-            <div className="text-4xl md:text-5xl font-serif font-bold text-gold mb-2">500+</div>
+            <div className="text-4xl md:text-5xl font-serif font-bold text-gold mb-2">600+</div>
             <div className="text-gray-600 font-medium">Projects Completed</div>
           </div>
-          <div>
+          {/* <div>
             <div className="text-4xl md:text-5xl font-serif font-bold text-gold mb-2">30+</div>
             <div className="text-gray-600 font-medium">Countries Served</div>
-          </div>
+          </div> */}
           <div>
-            <div className="text-4xl md:text-5xl font-serif font-bold text-gold mb-2">25+</div>
+            <div className="text-4xl md:text-5xl font-serif font-bold text-gold mb-2">30+</div>
             <div className="text-gray-600 font-medium">Years Experience</div>
           </div>
           <div>

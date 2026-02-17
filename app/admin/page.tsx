@@ -10,7 +10,7 @@ import TestimonialForm from '@/components/admin/TestimonialForm'
 import StoneTypeForm from '@/components/admin/StoneTypeForm'
 import ProductForm from '@/components/admin/ProductForm'
 
-type TabType = 'projects' | 'testimonials' | 'stone_types' | 'products'
+type TabType = 'projects' | 'testimonials' | 'stone_types' | 'products' | 'settings' | 'inquiries'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -22,6 +22,8 @@ export default function AdminPage() {
   const [testimonials, setTestimonials] = useState<any[]>([])
   const [stoneTypes, setStoneTypes] = useState<any[]>([])
   const [products, setProducts] = useState<any[]>([])
+  const [settings, setSettings] = useState<any[]>([])
+  const [inquiries, setInquiries] = useState<any[]>([])
   const [showProjectForm, setShowProjectForm] = useState(false)
   const [showTestimonialForm, setShowTestimonialForm] = useState(false)
   const [showStoneTypeForm, setShowStoneTypeForm] = useState(false)
@@ -55,17 +57,21 @@ export default function AdminPage() {
 
   const fetchData = async () => {
     try {
-      const [projectsData, testimonialsData, stoneTypesData, productsData] = await Promise.all([
+      const [projectsData, testimonialsData, stoneTypesData, productsData, settingsData, inquiriesData] = await Promise.all([
         adminApi('fetch', 'projects'),
         adminApi('fetch', 'testimonials'),
         adminApi('fetch', 'stone_types'),
         adminApi('fetch', 'products'),
+        adminApi('fetch', 'settings'),
+        adminApi('fetch', 'contact_inquiries'),
       ])
 
       setProjects(projectsData || [])
       setTestimonials(testimonialsData || [])
       setStoneTypes(stoneTypesData || [])
       setProducts(productsData || [])
+      setSettings(settingsData || [])
+      setInquiries(inquiriesData || [])
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -157,6 +163,8 @@ export default function AdminPage() {
             { key: 'testimonials' as TabType, label: 'Testimonials', count: testimonials.length },
             { key: 'stone_types' as TabType, label: 'Stone Types', count: stoneTypes.length },
             { key: 'products' as TabType, label: 'Products', count: products.length },
+            { key: 'inquiries' as TabType, label: 'Inquiries', count: inquiries.length },
+            { key: 'settings' as TabType, label: 'Settings', count: null },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -167,7 +175,7 @@ export default function AdminPage() {
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
             >
-              {tab.label} ({tab.count})
+              {tab.label}{tab.count !== null ? ` (${tab.count})` : ''}
             </button>
           ))}
         </div>
@@ -425,6 +433,180 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'inquiries' && (
+          <div>
+            <div className="mb-6">
+              <h2 className="text-2xl font-serif font-bold text-charcoal mb-2">Contact Inquiries</h2>
+              <p className="text-gray-600">Manage customer inquiries and track their status</p>
+            </div>
+
+            {inquiries.length === 0 ? (
+              <div className="bg-white p-12 text-center shadow-lg">
+                <p className="text-gray-600">No inquiries yet</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {inquiries.map((inquiry) => (
+                  <div key={inquiry.id} className="bg-white p-6 shadow-lg">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-xl font-serif font-bold text-charcoal">
+                            {inquiry.name}
+                          </h3>
+                          <select
+                            value={inquiry.status}
+                            onChange={async (e) => {
+                              try {
+                                await adminApi('update', 'contact_inquiries', { status: e.target.value }, inquiry.id)
+                                fetchData()
+                              } catch (error) {
+                                console.error('Error updating status:', error)
+                                alert('Failed to update status')
+                              }
+                            }}
+                            className={`px-3 py-1 text-sm font-semibold rounded ${
+                              inquiry.status === 'pending' 
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : inquiry.status === 'contacted'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="deal_done">Deal Done</option>
+                          </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                          <div>
+                            <span className="text-gray-500">Email:</span>{' '}
+                            <a href={`mailto:${inquiry.email}`} className="text-gold hover:underline">
+                              {inquiry.email}
+                            </a>
+                          </div>
+                          {inquiry.phone && (
+                            <div>
+                              <span className="text-gray-500">Phone:</span>{' '}
+                              <a href={`tel:${inquiry.phone}`} className="text-gold hover:underline">
+                                {inquiry.phone}
+                              </a>
+                            </div>
+                          )}
+                          {inquiry.company && (
+                            <div>
+                              <span className="text-gray-500">Company:</span> {inquiry.company}
+                            </div>
+                          )}
+                          {inquiry.project_type && (
+                            <div>
+                              <span className="text-gray-500">Project Type:</span> {inquiry.project_type}
+                            </div>
+                          )}
+                          {inquiry.budget && (
+                            <div>
+                              <span className="text-gray-500">Budget:</span> {inquiry.budget}
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-gray-500">Date:</span>{' '}
+                            {new Date(inquiry.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                        <div className="mb-3">
+                          <span className="text-gray-500 text-sm">Message:</span>
+                          <p className="text-gray-700 mt-1">{inquiry.message}</p>
+                        </div>
+                        {inquiry.notes && (
+                          <div className="bg-gray-50 p-3 rounded">
+                            <span className="text-gray-500 text-sm">Notes:</span>
+                            <p className="text-gray-700 mt-1">{inquiry.notes}</p>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => deleteItem('contact_inquiries', inquiry.id)}
+                        className="ml-4 px-3 py-2 bg-red-500 text-white hover:bg-red-600 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div>
+            <div className="bg-white p-8 shadow-lg max-w-3xl">
+              <h2 className="text-2xl font-serif font-bold text-charcoal mb-6">General Settings</h2>
+              
+              <div className="space-y-6">
+                {settings.map((setting) => (
+                  <div key={setting.key} className="border-b border-gray-200 pb-6 last:border-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h3 className="text-lg font-semibold text-charcoal capitalize">
+                          {setting.key.replace(/_/g, ' ')}
+                        </h3>
+                        {setting.description && (
+                          <p className="text-sm text-gray-600 mt-1">{setting.description}</p>
+                        )}
+                      </div>
+                      
+                      {(setting.key === 'show_product_categories' || setting.key === 'show_portfolio_categories') && (
+                        <button
+                          onClick={async () => {
+                            const newValue = setting.value === 'true' ? 'false' : 'true'
+                            try {
+                              await fetch('/api/admin', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  action: 'update_setting',
+                                  data: { key: setting.key, value: newValue }
+                                })
+                              })
+                              fetchData()
+                            } catch (error) {
+                              console.error('Error updating setting:', error)
+                              alert('Failed to update setting')
+                            }
+                          }}
+                          className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                            setting.value === 'true' ? 'bg-gold' : 'bg-gray-300'
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                              setting.value === 'true' ? 'translate-x-7' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="text-sm">
+                      <span className="text-gray-500">Current value: </span>
+                      <span className="font-medium text-charcoal">
+                        {setting.value === 'true' ? 'Enabled' : setting.value === 'false' ? 'Disabled' : setting.value}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

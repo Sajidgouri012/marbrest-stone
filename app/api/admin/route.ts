@@ -41,6 +41,16 @@ export async function POST(request: NextRequest) {
             .from(table)
             .select('*')
             .order('display_order', { ascending: true })
+        } else if (table === 'settings') {
+          result = await supabase
+            .from(table)
+            .select('*')
+            .order('key', { ascending: true })
+        } else if (table === 'contact_inquiries') {
+          result = await supabase
+            .from(table)
+            .select('*')
+            .order('created_at', { ascending: false })
         } else {
           result = await supabase
             .from(table)
@@ -48,6 +58,14 @@ export async function POST(request: NextRequest) {
             .order('display_order', { ascending: true })
             .order('created_at', { ascending: false })
         }
+        break
+      case 'update_setting':
+        // Special case for updating settings by key
+        result = await supabase
+          .from('settings')
+          .update({ value: data.value })
+          .eq('key', data.key)
+          .select()
         break
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })

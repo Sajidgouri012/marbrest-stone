@@ -225,6 +225,66 @@ INSERT INTO products (name, description, image_url, stone_type_id, origin, featu
   true
 );
 
+-- Create settings table for general site configuration
+CREATE TABLE IF NOT EXISTS settings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  key TEXT NOT NULL UNIQUE,
+  value JSONB NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Enable RLS for settings
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+
+-- Public can read settings
+CREATE POLICY "Public can view settings"
+  ON settings FOR SELECT
+  USING (true);
+
+-- Admin can do everything with settings
+CREATE POLICY "Allow all operations on settings"
+  ON settings FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+-- Insert default settings
+INSERT INTO settings (key, value, description) VALUES
+('show_product_categories', 'true', 'Show/hide product category filters on the products page'),
+('show_portfolio_categories', 'true', 'Show/hide portfolio category filters on the portfolio page'),
+('site_name', '"Marbrest Stone"', 'Website name'),
+('contact_email', '"info@marbreststone.com"', 'Contact email address');
+
+-- Create contact inquiries table
+CREATE TABLE IF NOT EXISTS contact_inquiries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  company TEXT,
+  project_type TEXT,
+  budget TEXT,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'contacted', 'deal_done')),
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_inquiries_status ON contact_inquiries(status);
+CREATE INDEX IF NOT EXISTS idx_inquiries_created ON contact_inquiries(created_at DESC);
+
+-- Enable RLS for contact_inquiries
+ALTER TABLE contact_inquiries ENABLE ROW LEVEL SECURITY;
+
+-- Admin can do everything with inquiries
+CREATE POLICY "Allow all operations on contact_inquiries"
+  ON contact_inquiries FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
 -- ============================================
 -- MIGRATION: Run this if tables already exist
 -- Adds display_order column to existing tables
