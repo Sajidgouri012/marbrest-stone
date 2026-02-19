@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { Check, Sparkles } from 'lucide-react'
+import { Check, Sparkles, Play, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
+import ProductPrice from '@/components/ProductPrice'
+import QuoteRequestModal from '@/components/QuoteRequestModal'
 
 interface StoneType {
   id: string
@@ -21,12 +23,19 @@ interface Product {
   name: string
   description: string
   image_url: string
+  video_url?: string
   stone_type_id: string
   stone_type?: StoneType
   origin: string
   features: string[]
   customizable: boolean
   visible: boolean
+  price_type: 'fixed' | 'range' | 'quote'
+  base_price?: number | null
+  min_price?: number | null
+  max_price?: number | null
+  price_unit?: string
+  whatsapp_link?: string | null
 }
 
 export default function ProductsPage() {
@@ -36,6 +45,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true)
   const [showCategories, setShowCategories] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
 
   // Fallback stone types
   const fallbackStoneTypes: StoneType[] = [
@@ -58,6 +68,10 @@ export default function ProductsPage() {
       features: ['Taj Mahal Quality', 'Pure White', 'High Durability', 'Polished Finish'],
       customizable: true,
       visible: true,
+      price_type: 'range',
+      min_price: 450,
+      max_price: 850,
+      price_unit: 'per sq ft',
     },
     {
       id: '2',
@@ -69,6 +83,9 @@ export default function ProductsPage() {
       features: ['Grey Veining', 'Luxury Grade', 'Versatile Use', 'Custom Sizes'],
       customizable: true,
       visible: true,
+      price_type: 'fixed',
+      base_price: 1200,
+      price_unit: 'per sq ft',
     },
     {
       id: '3',
@@ -80,6 +97,10 @@ export default function ProductsPage() {
       features: ['Rich Brown Tone', 'White Veining', 'Elegant Finish', 'Heat Resistant'],
       customizable: true,
       visible: true,
+      price_type: 'range',
+      min_price: 350,
+      max_price: 650,
+      price_unit: 'per sq ft',
     },
     {
       id: '4',
@@ -91,6 +112,8 @@ export default function ProductsPage() {
       features: ['Gold Veining', 'Premium Quality', 'Statement Piece', 'Bespoke Cuts'],
       customizable: true,
       visible: true,
+      price_type: 'quote',
+      whatsapp_link: 'https://wa.me/919876543210?text=Hi,%20I%20am%20interested%20in%20Calacatta%20Gold%20Marble',
     },
     {
       id: '5',
@@ -102,6 +125,9 @@ export default function ProductsPage() {
       features: ['Golden Speckles', 'Ultra Durable', 'Low Maintenance', 'Scratch Resistant'],
       customizable: true,
       visible: true,
+      price_type: 'fixed',
+      base_price: 280,
+      price_unit: 'per sq ft',
     },
     {
       id: '6',
@@ -113,6 +139,11 @@ export default function ProductsPage() {
       features: ['Translucent', 'Backlit Compatible', 'Unique Patterns', 'Luxury Appeal'],
       customizable: true,
       visible: true,
+      price_type: 'range',
+      min_price: 800,
+      max_price: 1500,
+      price_unit: 'per sq ft',
+      whatsapp_link: 'https://wa.me/919876543210?text=Hi,%20I%20am%20interested%20in%20Green%20Onyx%20Slabs',
     },
     {
       id: '7',
@@ -124,6 +155,8 @@ export default function ProductsPage() {
       features: ['Handcrafted', 'Semi-Precious Stones', 'Custom Designs', 'Heritage Technique'],
       customizable: true,
       visible: true,
+      price_type: 'quote',
+      whatsapp_link: 'https://wa.me/919876543210?text=Hi,%20I%20am%20interested%20in%20Custom%20Inlay%20Work',
     },
     {
       id: '8',
@@ -135,6 +168,10 @@ export default function ProductsPage() {
       features: ['Multiple Sizes', 'Various Finishes', 'Easy Installation', 'Bulk Available'],
       customizable: true,
       visible: true,
+      price_type: 'range',
+      min_price: 150,
+      max_price: 400,
+      price_unit: 'per sq ft',
     },
   ]
 
@@ -216,6 +253,20 @@ export default function ProductsPage() {
       
       return true
     })
+
+  const getVideoEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const videoId = url.includes('youtu.be') 
+        ? url.split('youtu.be/')[1]?.split('?')[0]
+        : url.split('v=')[1]?.split('&')[0]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+    if (url.includes('vimeo.com')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0]
+      return `https://player.vimeo.com/video/${videoId}`
+    }
+    return url
+  }
 
   return (
     <div className="min-h-screen pt-20">
@@ -314,7 +365,12 @@ export default function ProductsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredProducts.map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  index={index}
+                  onVideoClick={setSelectedVideo}
+                />
               ))}
             </div>
           )}
@@ -354,13 +410,34 @@ export default function ProductsPage() {
           </motion.div>
         </div>
       </section>
+
+      {selectedVideo && (
+        <VideoModal
+          videoUrl={selectedVideo}
+          onClose={() => setSelectedVideo(null)}
+          getEmbedUrl={getVideoEmbedUrl}
+        />
+      )}
     </div>
   )
 }
 
-function ProductCard({ product, index }: { product: Product; index: number }) {
+function ProductCard({ 
+  product, 
+  index,
+  onVideoClick
+}: { 
+  product: Product
+  index: number
+  onVideoClick: (url: string) => void
+}) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const [showQuoteModal, setShowQuoteModal] = useState(false)
+
+  const handleAddToCart = () => {
+    alert('Add to cart functionality coming soon!')
+  }
 
   return (
     <motion.div
@@ -384,6 +461,22 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           </div>
         )}
 
+        {product.video_url && (
+          <>
+            <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center space-x-1.5 group-hover:opacity-0 transition-opacity duration-300">
+              <Play size={14} className="text-white" fill="white" />
+              <span className="text-white text-xs font-medium">Video</span>
+            </div>
+            
+            <button
+              onClick={() => onVideoClick(product.video_url!)}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold text-charcoal p-4 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+            >
+              <Play size={24} fill="currentColor" />
+            </button>
+          </>
+        )}
+
         <div className="absolute bottom-4 left-4 right-4">
           <h3 className="text-2xl font-serif font-bold text-white mb-1">
             {product.name}
@@ -397,7 +490,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           {product.description}
         </p>
 
-        <div className="space-y-2">
+        <div className="space-y-2 mb-4">
           {product.features.map((feature, idx) => (
             <div key={idx} className="flex items-center space-x-2">
               <Check className="text-gold flex-shrink-0" size={16} />
@@ -406,14 +499,65 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           ))}
         </div>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <a
-            href="/contact"
-            className="block text-center px-6 py-3 bg-charcoal text-white font-semibold tracking-wide hover:bg-gold hover:text-charcoal transition-all duration-300"
-          >
-            INQUIRE NOW
-          </a>
-        </div>
+        <ProductPrice
+          priceType={product.price_type}
+          basePrice={product.base_price}
+          minPrice={product.min_price}
+          maxPrice={product.max_price}
+          priceUnit={product.price_unit}
+          whatsappLink={product.whatsapp_link}
+          productName={product.name}
+          onRequestQuote={() => setShowQuoteModal(true)}
+          onAddToCart={handleAddToCart}
+        />
+      </div>
+
+      {showQuoteModal && (
+        <QuoteRequestModal
+          isOpen={showQuoteModal}
+          onClose={() => setShowQuoteModal(false)}
+          productId={product.id}
+          productName={product.name}
+        />
+      )}
+    </motion.div>
+  )
+}
+
+function VideoModal({ 
+  videoUrl, 
+  onClose, 
+  getEmbedUrl 
+}: { 
+  videoUrl: string
+  onClose: () => void
+  getEmbedUrl: (url: string) => string
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white hover:text-gold transition-colors"
+      >
+        <X size={32} />
+      </button>
+      
+      <div 
+        className="relative w-full max-w-5xl aspect-video"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <iframe
+          src={getEmbedUrl(videoUrl)}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
       </div>
     </motion.div>
   )

@@ -17,10 +17,17 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
     name: '',
     description: '',
     image_url: '',
+    video_url: '',
     stone_type_id: '',
     origin: '',
     features: [''],
     customizable: true,
+    price_type: 'quote' as 'fixed' | 'range' | 'quote',
+    base_price: '',
+    min_price: '',
+    max_price: '',
+    price_unit: 'per sq ft',
+    whatsapp_link: '',
     display_order: 0,
     visible: true,
   })
@@ -44,6 +51,10 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
         ...formData,
         features: formData.features.filter(f => f.trim() !== ''),
         stone_type_id: formData.stone_type_id || null,
+        base_price: formData.base_price ? parseFloat(formData.base_price as string) : null,
+        min_price: formData.min_price ? parseFloat(formData.min_price as string) : null,
+        max_price: formData.max_price ? parseFloat(formData.max_price as string) : null,
+        whatsapp_link: formData.whatsapp_link || null,
       }
 
       if (product) {
@@ -68,8 +79,10 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
       [name]: type === 'checkbox' 
         ? (e.target as HTMLInputElement).checked 
         : name === 'display_order' 
-          ? parseInt(value) || 0 
-          : value
+          ? parseInt(value) || 0
+          : name === 'base_price' || name === 'min_price' || name === 'max_price'
+            ? value
+            : value
     }))
   }
 
@@ -162,6 +175,21 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
 
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
+              Video URL
+            </label>
+            <input
+              type="url"
+              name="video_url"
+              value={formData.video_url}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+              placeholder="https://example.com/video.mp4 (optional)"
+            />
+            <p className="text-xs text-gray-500 mt-1">Optional video to showcase the product</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-charcoal mb-2">
               Stone Type *
             </label>
             <select
@@ -228,6 +256,123 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
                 <Plus size={16} />
                 <span>Add Feature</span>
               </button>
+            </div>
+          </div>
+
+          {/* Pricing Section */}
+          <div className="border-t border-gray-200 pt-6 mt-6">
+            <h3 className="text-lg font-serif font-bold text-charcoal mb-4">Pricing Information</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-charcoal mb-2">
+                  Price Type *
+                </label>
+                <select
+                  name="price_type"
+                  required
+                  value={formData.price_type}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                >
+                  <option value="quote">Quote Only (Custom Made)</option>
+                  <option value="range">Price Range</option>
+                  <option value="fixed">Fixed Price</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.price_type === 'fixed' && 'Shows exact price with "Add to Cart" button'}
+                  {formData.price_type === 'range' && 'Shows starting price with "Request Quote" button'}
+                  {formData.price_type === 'quote' && 'No price shown, displays "Custom Made" badge'}
+                </p>
+              </div>
+
+              {formData.price_type === 'fixed' && (
+                <div>
+                  <label className="block text-sm font-semibold text-charcoal mb-2">
+                    Base Price (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    name="base_price"
+                    required={formData.price_type === 'fixed'}
+                    value={formData.base_price}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                    placeholder="25000"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              )}
+
+              {formData.price_type === 'range' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-charcoal mb-2">
+                      Min Price (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      name="min_price"
+                      required={formData.price_type === 'range'}
+                      value={formData.min_price}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                      placeholder="25000"
+                      step="0.01"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-charcoal mb-2">
+                      Max Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      name="max_price"
+                      value={formData.max_price}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                      placeholder="50000"
+                      step="0.01"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {(formData.price_type === 'fixed' || formData.price_type === 'range') && (
+                <div>
+                  <label className="block text-sm font-semibold text-charcoal mb-2">
+                    Price Unit
+                  </label>
+                  <input
+                    type="text"
+                    name="price_unit"
+                    value={formData.price_unit}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                    placeholder="per sq ft"
+                  />
+                </div>
+              )}
+
+              {(formData.price_type === 'range' || formData.price_type === 'quote') && (
+                <div>
+                  <label className="block text-sm font-semibold text-charcoal mb-2">
+                    WhatsApp Link
+                  </label>
+                  <input
+                    type="url"
+                    name="whatsapp_link"
+                    value={formData.whatsapp_link}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                    placeholder="https://wa.me/919876543210?text=..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Optional: Direct WhatsApp link for inquiries</p>
+                </div>
+              )}
             </div>
           </div>
 

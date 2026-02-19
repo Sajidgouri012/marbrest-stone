@@ -24,6 +24,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<any[]>([])
   const [settings, setSettings] = useState<any[]>([])
   const [inquiries, setInquiries] = useState<any[]>([])
+  const [quoteRequests, setQuoteRequests] = useState<any[]>([])
   const [showProjectForm, setShowProjectForm] = useState(false)
   const [showTestimonialForm, setShowTestimonialForm] = useState(false)
   const [showStoneTypeForm, setShowStoneTypeForm] = useState(false)
@@ -57,13 +58,14 @@ export default function AdminPage() {
 
   const fetchData = async () => {
     try {
-      const [projectsData, testimonialsData, stoneTypesData, productsData, settingsData, inquiriesData] = await Promise.all([
+      const [projectsData, testimonialsData, stoneTypesData, productsData, settingsData, inquiriesData, quoteRequestsData] = await Promise.all([
         adminApi('fetch', 'projects'),
         adminApi('fetch', 'testimonials'),
         adminApi('fetch', 'stone_types'),
         adminApi('fetch', 'products'),
         adminApi('fetch', 'settings'),
         adminApi('fetch', 'contact_inquiries'),
+        adminApi('fetch', 'quote_requests'),
       ])
 
       setProjects(projectsData || [])
@@ -72,6 +74,7 @@ export default function AdminPage() {
       setProducts(productsData || [])
       setSettings(settingsData || [])
       setInquiries(inquiriesData || [])
+      setQuoteRequests(quoteRequestsData || [])
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -440,111 +443,242 @@ export default function AdminPage() {
         {activeTab === 'inquiries' && (
           <div>
             <div className="mb-6">
-              <h2 className="text-2xl font-serif font-bold text-charcoal mb-2">Contact Inquiries</h2>
-              <p className="text-gray-600">Manage customer inquiries and track their status</p>
+              <h2 className="text-2xl font-serif font-bold text-charcoal mb-2">Inquiries & Quote Requests</h2>
+              <p className="text-gray-600">Manage customer inquiries and quote requests</p>
             </div>
 
-            {inquiries.length === 0 ? (
-              <div className="bg-white p-12 text-center shadow-lg">
-                <p className="text-gray-600">No inquiries yet</p>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-gray-600">
+                  Total Inquiries: <span className="font-bold text-charcoal text-lg">{inquiries.length + quoteRequests.length}</span>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {inquiries.map((inquiry) => (
-                  <div key={inquiry.id} className="bg-white p-6 shadow-lg">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-serif font-bold text-charcoal">
-                            {inquiry.name}
-                          </h3>
-                          <select
-                            value={inquiry.status}
-                            onChange={async (e) => {
-                              try {
-                                await adminApi('update', 'contact_inquiries', { status: e.target.value }, inquiry.id)
-                                fetchData()
-                              } catch (error) {
-                                console.error('Error updating status:', error)
-                                alert('Failed to update status')
-                              }
-                            }}
-                            className={`px-3 py-1 text-sm font-semibold rounded ${
-                              inquiry.status === 'pending' 
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : inquiry.status === 'contacted'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="deal_done">Deal Done</option>
-                          </select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-                          <div>
-                            <span className="text-gray-500">Email:</span>{' '}
-                            <a href={`mailto:${inquiry.email}`} className="text-gold hover:underline">
-                              {inquiry.email}
-                            </a>
+              <div className="flex gap-4 border-b border-gray-200">
+                <button
+                  onClick={() => setActiveTab('inquiries')}
+                  className="px-4 py-2 font-semibold text-charcoal border-b-2 border-gold"
+                >
+                  Contact Inquiries ({inquiries.length})
+                </button>
+                <button
+                  onClick={() => {
+                    const quoteTab = document.getElementById('quote-requests-tab')
+                    if (quoteTab) quoteTab.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                  className="px-4 py-2 font-semibold text-gray-600 hover:text-charcoal"
+                >
+                  Quote Requests ({quoteRequests.length})
+                </button>
+              </div>
+            </div>
+
+            {/* Contact Inquiries */}
+            <div className="mb-12">
+              <h3 className="text-lg font-semibold text-charcoal mb-4">Contact Inquiries</h3>
+              {inquiries.length === 0 ? (
+                <div className="bg-white p-12 text-center shadow-lg">
+                  <p className="text-gray-600">No contact inquiries yet</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {inquiries.map((inquiry) => (
+                    <div key={inquiry.id} className="bg-white p-6 shadow-lg">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-xl font-serif font-bold text-charcoal">
+                              {inquiry.name}
+                            </h3>
+                            <select
+                              value={inquiry.status}
+                              onChange={async (e) => {
+                                try {
+                                  await adminApi('update', 'contact_inquiries', { status: e.target.value }, inquiry.id)
+                                  fetchData()
+                                } catch (error) {
+                                  console.error('Error updating status:', error)
+                                  alert('Failed to update status')
+                                }
+                              }}
+                              className={`px-3 py-1 text-sm font-semibold rounded ${
+                                inquiry.status === 'pending' 
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : inquiry.status === 'contacted'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-green-100 text-green-800'
+                              }`}
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="contacted">Contacted</option>
+                              <option value="deal_done">Deal Done</option>
+                            </select>
                           </div>
-                          {inquiry.phone && (
+                          <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                             <div>
-                              <span className="text-gray-500">Phone:</span>{' '}
-                              <a href={`tel:${inquiry.phone}`} className="text-gold hover:underline">
-                                {inquiry.phone}
+                              <span className="text-gray-500">Email:</span>{' '}
+                              <a href={`mailto:${inquiry.email}`} className="text-gold hover:underline">
+                                {inquiry.email}
                               </a>
                             </div>
-                          )}
-                          {inquiry.company && (
+                            {inquiry.phone && (
+                              <div>
+                                <span className="text-gray-500">Phone:</span>{' '}
+                                <a href={`tel:${inquiry.phone}`} className="text-gold hover:underline">
+                                  {inquiry.phone}
+                                </a>
+                              </div>
+                            )}
+                            {inquiry.company && (
+                              <div>
+                                <span className="text-gray-500">Company:</span> {inquiry.company}
+                              </div>
+                            )}
+                            {inquiry.project_type && (
+                              <div>
+                                <span className="text-gray-500">Project Type:</span> {inquiry.project_type}
+                              </div>
+                            )}
+                            {inquiry.budget && (
+                              <div>
+                                <span className="text-gray-500">Budget:</span> {inquiry.budget}
+                              </div>
+                            )}
                             <div>
-                              <span className="text-gray-500">Company:</span> {inquiry.company}
+                              <span className="text-gray-500">Date:</span>{' '}
+                              {new Date(inquiry.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
                             </div>
-                          )}
-                          {inquiry.project_type && (
-                            <div>
-                              <span className="text-gray-500">Project Type:</span> {inquiry.project_type}
-                            </div>
-                          )}
-                          {inquiry.budget && (
-                            <div>
-                              <span className="text-gray-500">Budget:</span> {inquiry.budget}
-                            </div>
-                          )}
-                          <div>
-                            <span className="text-gray-500">Date:</span>{' '}
-                            {new Date(inquiry.created_at).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
                           </div>
-                        </div>
-                        <div className="mb-3">
-                          <span className="text-gray-500 text-sm">Message:</span>
-                          <p className="text-gray-700 mt-1">{inquiry.message}</p>
-                        </div>
-                        {inquiry.notes && (
-                          <div className="bg-gray-50 p-3 rounded">
-                            <span className="text-gray-500 text-sm">Notes:</span>
-                            <p className="text-gray-700 mt-1">{inquiry.notes}</p>
+                          <div className="mb-3">
+                            <span className="text-gray-500 text-sm">Message:</span>
+                            <p className="text-gray-700 mt-1">{inquiry.message}</p>
                           </div>
-                        )}
+                          {inquiry.notes && (
+                            <div className="bg-gray-50 p-3 rounded">
+                              <span className="text-gray-500 text-sm">Notes:</span>
+                              <p className="text-gray-700 mt-1">{inquiry.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => deleteItem('contact_inquiries', inquiry.id)}
+                          className="ml-4 px-3 py-2 bg-red-500 text-white hover:bg-red-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => deleteItem('contact_inquiries', inquiry.id)}
-                        className="ml-4 px-3 py-2 bg-red-500 text-white hover:bg-red-600 transition-colors"
-                      >
-                        <Trash2 size={16} />
-                      </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Quote Requests */}
+            <div id="quote-requests-tab">
+              <h3 className="text-lg font-semibold text-charcoal mb-4">Product Quote Requests</h3>
+              {quoteRequests.length === 0 ? (
+                <div className="bg-white p-12 text-center shadow-lg">
+                  <p className="text-gray-600">No quote requests yet</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {quoteRequests.map((quote) => (
+                    <div key={quote.id} className="bg-white p-6 shadow-lg border-l-4 border-gold">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-xl font-serif font-bold text-charcoal">
+                              {quote.name}
+                            </h3>
+                            <select
+                              value={quote.status}
+                              onChange={async (e) => {
+                                try {
+                                  await adminApi('update', 'quote_requests', { status: e.target.value }, quote.id)
+                                  fetchData()
+                                } catch (error) {
+                                  console.error('Error updating status:', error)
+                                  alert('Failed to update status')
+                                }
+                              }}
+                              className={`px-3 py-1 text-sm font-semibold rounded ${
+                                quote.status === 'pending' 
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : quote.status === 'contacted'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : quote.status === 'quoted'
+                                  ? 'bg-purple-100 text-purple-800'
+                                  : 'bg-green-100 text-green-800'
+                              }`}
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="contacted">Contacted</option>
+                              <option value="quoted">Quote Sent</option>
+                              <option value="converted">Converted</option>
+                            </select>
+                          </div>
+                          
+                          <div className="bg-gold/10 px-3 py-2 rounded mb-3">
+                            <span className="text-sm font-semibold text-charcoal">Product:</span>{' '}
+                            <span className="text-sm text-charcoal">{quote.product_name}</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                            <div>
+                              <span className="text-gray-500">Email:</span>{' '}
+                              <a href={`mailto:${quote.email}`} className="text-gold hover:underline">
+                                {quote.email}
+                              </a>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Phone:</span>{' '}
+                              <a href={`tel:${quote.phone}`} className="text-gold hover:underline">
+                                {quote.phone}
+                              </a>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Date:</span>{' '}
+                              {new Date(quote.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          </div>
+
+                          {quote.requirements && (
+                            <div className="mb-3">
+                              <span className="text-gray-500 text-sm">Requirements:</span>
+                              <p className="text-gray-700 mt-1">{quote.requirements}</p>
+                            </div>
+                          )}
+
+                          {quote.notes && (
+                            <div className="bg-gray-50 p-3 rounded">
+                              <span className="text-gray-500 text-sm">Admin Notes:</span>
+                              <p className="text-gray-700 mt-1">{quote.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => deleteItem('quote_requests', quote.id)}
+                          className="ml-4 px-3 py-2 bg-red-500 text-white hover:bg-red-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

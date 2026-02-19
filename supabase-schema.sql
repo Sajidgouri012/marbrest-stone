@@ -87,16 +87,26 @@ CREATE TABLE IF NOT EXISTS stone_types (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
+-- Create price_type enum
+CREATE TYPE price_type AS ENUM ('fixed', 'range', 'quote');
+
 -- Create products table
 CREATE TABLE IF NOT EXISTS products (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
   image_url TEXT NOT NULL,
+  video_url TEXT,
   stone_type_id UUID REFERENCES stone_types(id) ON DELETE SET NULL,
   origin TEXT NOT NULL,
   features TEXT[] DEFAULT '{}',
   customizable BOOLEAN DEFAULT true,
+  price_type price_type DEFAULT 'quote',
+  base_price DECIMAL(10, 2),
+  min_price DECIMAL(10, 2),
+  max_price DECIMAL(10, 2),
+  price_unit TEXT DEFAULT 'per sq ft',
+  whatsapp_link TEXT,
   display_order INTEGER DEFAULT 0,
   visible BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
@@ -285,10 +295,59 @@ CREATE POLICY "Allow all operations on contact_inquiries"
   USING (true)
   WITH CHECK (true);
 
+-- Create quote requests table
+CREATE TABLE IF NOT EXISTS quote_requests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id UUID REFERENCES products(id) ON DELETE SET NULL,
+  product_name TEXT NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  requirements TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'contacted', 'quoted', 'converted')),
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Create indexes for quote_requests
+CREATE INDEX IF NOT EXISTS idx_quote_requests_status ON quote_requests(status);
+CREATE INDEX IF NOT EXISTS idx_quote_requests_product ON quote_requests(product_id);
+CREATE INDEX IF NOT EXISTS idx_quote_requests_created ON quote_requests(created_at DESC);
+
+-- Enable RLS for quote_requests
+ALTER TABLE quote_requests ENABLE ROW LEVEL SECURITY;
+
+-- Public can insert quote requests
+CREATE POLICY "Public can insert quote requests"
+  ON quote_requests FOR INSERT
+  WITH CHECK (true);
+
+-- Admin can do everything with quote requests
+CREATE POLICY "Allow all operations on quote_requests"
+  ON quote_requests FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
 -- ============================================
 -- MIGRATION: Run this if tables already exist
--- Adds display_order column to existing tables
 -- ============================================
 -- ALTER TABLE projects ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
 -- ALTER TABLE testimonials ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS video_url TEXT;
+
+-- Create price_type enum if it doesn't exist
+-- DO $$ BEGIN
+--   CREATE TYPE price_type AS ENUM ('fixed', 'range', 'quote');
+-- EXCEPTION
+--   WHEN duplicate_object THEN null;
+-- END $$;
+
+-- Add pricing columns to products table
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS price_type price_type DEFAULT 'quote';
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS base_price DECIMAL(10, 2);
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS min_price DECIMAL(10, 2);
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS max_price DECIMAL(10, 2);
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS price_unit TEXT DEFAULT 'per sq ft';
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS whatsapp_link TEXT;

@@ -23,6 +23,7 @@ export default function PortfolioPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [showCategories, setShowCategories] = useState(true)
 
@@ -190,6 +191,7 @@ export default function PortfolioPage() {
                   project={project}
                   index={index}
                   onVideoClick={setSelectedVideo}
+                  onImageClick={(url, title) => setSelectedImage({ url, title })}
                 />
               ))}
             </div>
@@ -204,6 +206,14 @@ export default function PortfolioPage() {
           getEmbedUrl={getVideoEmbedUrl}
         />
       )}
+
+      {selectedImage && (
+        <ImageModal
+          imageUrl={selectedImage.url}
+          title={selectedImage.title}
+          onClose={() => setSelectedImage(null)}
+        />
+      )}
     </div>
   )
 }
@@ -211,11 +221,13 @@ export default function PortfolioPage() {
 function ProjectCard({ 
   project, 
   index, 
-  onVideoClick 
+  onVideoClick,
+  onImageClick
 }: { 
   project: Project
   index: number
   onVideoClick: (url: string) => void
+  onImageClick: (url: string, title: string) => void
 }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
@@ -228,7 +240,10 @@ function ProjectCard({
       transition={{ duration: 0.6, delay: index * 0.1 }}
       className="group relative overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300"
     >
-      <div className="relative h-80 overflow-hidden">
+      <div 
+        className="relative h-80 overflow-hidden cursor-pointer"
+        onClick={() => !project.video_url && onImageClick(project.image_url, project.title)}
+      >
         <img
           src={project.image_url}
           alt={project.title}
@@ -304,6 +319,50 @@ function VideoModal({
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         />
+      </div>
+    </motion.div>
+  )
+}
+
+function ImageModal({ 
+  imageUrl, 
+  title, 
+  onClose 
+}: { 
+  imageUrl: string
+  title: string
+  onClose: () => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white hover:text-gold transition-colors z-10"
+      >
+        <X size={32} />
+      </button>
+      
+      <div 
+        className="relative flex items-center justify-center w-full h-full"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <motion.img
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          src={imageUrl}
+          alt={title}
+          className="max-w-full max-h-[calc(100vh-8rem)] object-contain"
+        />
+        <div className="absolute bottom-4 left-4 right-4 bg-gradient-to-t from-black/80 to-transparent p-4 rounded">
+          <h3 className="text-white text-xl md:text-2xl font-serif font-bold">{title}</h3>
+        </div>
       </div>
     </motion.div>
   )
