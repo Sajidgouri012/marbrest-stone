@@ -34,17 +34,16 @@ interface ProductDetailModalProps {
   product: Product
   isOpen: boolean
   onClose: () => void
-  onVideoClick?: (url: string) => void
 }
 
 export default function ProductDetailModal({
   product,
   isOpen,
-  onClose,
-  onVideoClick
+  onClose
 }: ProductDetailModalProps) {
   const [showQuoteModal, setShowQuoteModal] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false)
 
   // Build gallery: combine main image + additional images (if any)
   const buildImageGallery = () => {
@@ -82,6 +81,28 @@ export default function ProductDetailModal({
     setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
+  const getVideoEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const videoId = url.includes('youtu.be') 
+        ? url.split('youtu.be/')[1]?.split('?')[0]
+        : url.split('v=')[1]?.split('&')[0]
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`
+    }
+    if (url.includes('vimeo.com')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0]
+      return `https://player.vimeo.com/video/${videoId}?autoplay=1`
+    }
+    return url
+  }
+
+  const handlePlayVideo = () => {
+    setIsPlayingVideo(true)
+  }
+
+  const handleCloseVideo = () => {
+    setIsPlayingVideo(false)
+  }
+
   if (!isOpen) return null
 
   return (
@@ -111,71 +132,96 @@ export default function ProductDetailModal({
             </button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8">
-              {/* Left Side - Image Gallery */}
+              {/* Left Side - Image Gallery or Video Player */}
               <div className="space-y-4">
-                {/* Main Image */}
-                <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
-                  <img
-                    src={images[selectedImageIndex]}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                  
-                  {product.customizable && (
-                    <div className="absolute top-4 right-4 bg-gold px-3 py-1.5 rounded-full">
-                      <span className="text-charcoal text-xs font-bold">CUSTOMIZABLE</span>
-                    </div>
-                  )}
-
-                  {product.video_url && (
+                {isPlayingVideo && product.video_url ? (
+                  /* Inline Video Player */
+                  <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
+                    <iframe
+                      src={getVideoEmbedUrl(product.video_url)}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      title={`${product.name} video`}
+                    />
+                    
+                    {/* Close Video Button */}
                     <button
-                      onClick={() => onVideoClick?.(product.video_url!)}
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold text-charcoal p-4 rounded-full hover:scale-110 transition-transform shadow-lg"
+                      onClick={handleCloseVideo}
+                      className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-colors z-10"
+                      title="Close video"
                     >
-                      <Play size={32} fill="currentColor" />
+                      <X size={20} />
                     </button>
-                  )}
-
-                  {/* Navigation Arrows (if multiple images) */}
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        onClick={prevImage}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
-                      >
-                        <ChevronLeft size={24} className="text-charcoal" />
-                      </button>
-                      <button
-                        onClick={nextImage}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
-                      >
-                        <ChevronRight size={24} className="text-charcoal" />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Thumbnail Gallery (if multiple images) */}
-                {images.length > 1 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedImageIndex(idx)}
-                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedImageIndex === idx
-                            ? 'border-gold'
-                            : 'border-transparent hover:border-gray-300'
-                        }`}
-                      >
-                        <img
-                          src={img}
-                          alt={`${product.name} ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
                   </div>
+                ) : (
+                  /* Image Gallery */
+                  <>
+                    {/* Main Image */}
+                    <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
+                      <img
+                        src={images[selectedImageIndex]}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                      
+                      {product.customizable && (
+                        <div className="absolute top-4 right-4 bg-gold px-3 py-1.5 rounded-full">
+                          <span className="text-charcoal text-xs font-bold">CUSTOMIZABLE</span>
+                        </div>
+                      )}
+
+                      {product.video_url && (
+                        <button
+                          onClick={handlePlayVideo}
+                          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold text-charcoal p-4 rounded-full hover:scale-110 transition-transform shadow-lg"
+                        >
+                          <Play size={32} fill="currentColor" />
+                        </button>
+                      )}
+
+                      {/* Navigation Arrows (if multiple images) */}
+                      {images.length > 1 && (
+                        <>
+                          <button
+                            onClick={prevImage}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+                          >
+                            <ChevronLeft size={24} className="text-charcoal" />
+                          </button>
+                          <button
+                            onClick={nextImage}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
+                          >
+                            <ChevronRight size={24} className="text-charcoal" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Thumbnail Gallery (if multiple images) */}
+                    {images.length > 1 && (
+                      <div className="grid grid-cols-4 gap-2">
+                        {images.map((img, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedImageIndex(idx)}
+                            className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                              selectedImageIndex === idx
+                                ? 'border-gold'
+                                : 'border-transparent hover:border-gray-300'
+                            }`}
+                          >
+                            <img
+                              src={img}
+                              alt={`${product.name} ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

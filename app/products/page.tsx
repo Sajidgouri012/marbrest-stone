@@ -425,7 +425,6 @@ export default function ProductsPage() {
           product={selectedProduct}
           isOpen={!!selectedProduct}
           onClose={() => setSelectedProduct(null)}
-          onVideoClick={setSelectedVideo}
         />
       )}
     </div>
