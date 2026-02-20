@@ -195,7 +195,7 @@ export default function PortfolioPage() {
                     Bring These Masterpieces to Your Space
                   </h2>
                   <p className="text-base md:text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
-                    Premium stones, marble flooring, temple & mosque arts, carved handicrafts, and complete contract work for your projects
+                    Premium stones, marble flooring, mosque & temple arts, carved handicrafts, and complete contract work for your projects
                   </p>
                   
                   <motion.a

@@ -283,7 +283,7 @@ export default function ProductsPage() {
               Our Products & Services
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Premium marble, granite & stone products • Marble flooring installations • Temple & mosque artistry • 
+              Premium marble, granite & stone products • Marble flooring installations • Mosque & temple artistry • 
               Carved handicrafts • Home decor • Complete contract work for residential & commercial projects
             </p>
             <div className="flex flex-wrap justify-center gap-3">

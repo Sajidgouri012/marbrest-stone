@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef, useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, Pause, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 
 interface Project {
@@ -11,6 +11,7 @@ interface Project {
   title: string
   location: string
   image_url: string
+  video_url?: string
   description: string
   category: string
 }
@@ -21,6 +22,7 @@ export default function FeaturedProjects() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false)
 
   useEffect(() => {
     async function fetchProjects() {
@@ -47,14 +49,34 @@ export default function FeaturedProjects() {
 
   const nextProject = () => {
     if (projects.length > 0) {
+      setIsPlayingVideo(false)
       setCurrentIndex((prev) => (prev + 1) % projects.length)
     }
   }
 
   const prevProject = () => {
     if (projects.length > 0) {
+      setIsPlayingVideo(false)
       setCurrentIndex((prev) => (prev - 1 + projects.length) % projects.length)
     }
+  }
+
+  const getVideoEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const videoId = url.includes('youtu.be') 
+        ? url.split('youtu.be/')[1]?.split('?')[0]
+        : url.split('v=')[1]?.split('&')[0]
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1`
+    }
+    if (url.includes('vimeo.com')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0]
+      return `https://player.vimeo.com/video/${videoId}?autoplay=1`
+    }
+    return url
+  }
+
+  const toggleVideo = () => {
+    setIsPlayingVideo(!isPlayingVideo)
   }
 
   if (loading) {
@@ -100,11 +122,40 @@ export default function FeaturedProjects() {
             transition={{ duration: 0.5 }}
             className="relative h-[500px] md:h-[600px] rounded-sm overflow-hidden shadow-2xl bg-black"
           >
-            <img
-              src={projects[currentIndex].image_url}
-              alt={projects[currentIndex].title}
-              className="w-full h-full object-contain"
-            />
+            {isPlayingVideo && projects[currentIndex].video_url ? (
+              <div className="relative w-full h-full">
+                <iframe
+                  src={getVideoEmbedUrl(projects[currentIndex].video_url!)}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+                <button
+                  onClick={() => setIsPlayingVideo(false)}
+                  className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition-all duration-300 z-10"
+                  aria-label="Close video"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <img
+                  src={projects[currentIndex].image_url}
+                  alt={projects[currentIndex].title}
+                  className="w-full h-full object-contain"
+                />
+                {projects[currentIndex].video_url && (
+                  <button
+                    onClick={toggleVideo}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold/90 hover:bg-gold text-charcoal p-6 rounded-full transition-all duration-300 hover:scale-110 shadow-2xl z-10"
+                    aria-label="Play video"
+                  >
+                    <Play size={32} fill="currentColor" />
+                  </button>
+                )}
+              </>
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/50 to-transparent pointer-events-none" />
             
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">

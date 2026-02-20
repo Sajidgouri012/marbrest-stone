@@ -89,13 +89,13 @@ export default function FeaturedProductsSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <span className="text-gold text-sm font-semibold tracking-widest uppercase">Our Collection</span>
+          <span className="text-gold text-sm font-semibold tracking-widest uppercase">Products & Services</span>
           <div className="h-px w-16 bg-gold mx-auto mt-2 mb-6" />
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">
-            Premium Stone Materials
+            Premium Stones & Craftsmanship
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Discover our curated selection of the world's finest natural stones
+            Natural stones, marble flooring, Mosque & temple artistry, carved handicrafts, home decor, and complete contract work
           </p>
         </motion.div>
 
