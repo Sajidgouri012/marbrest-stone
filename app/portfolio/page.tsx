@@ -174,6 +174,52 @@ export default function PortfolioPage() {
             </div>
           )}
 
+          {/* Products CTA Banner - Top Position */}
+          <div className="mb-12 -mx-6 lg:-mx-8">
+            <div className="py-12 px-6 lg:px-8 bg-gradient-to-br from-charcoal via-charcoal to-gray-900 relative overflow-hidden">
+              <div className="absolute inset-0 opacity-5">
+                <div className="absolute inset-0" style={{
+                  backgroundImage: `url('https://images.unsplash.com/photo-1615873968403-89e068629265?q=80&w=1932&auto=format&fit=crop')`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }} />
+              </div>
+              
+              <div className="relative z-10 max-w-4xl mx-auto text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-white mb-3 leading-tight">
+                    Bring These Masterpieces to Your Space
+                  </h2>
+                  <p className="text-base md:text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
+                    Premium stones, marble flooring, temple & mosque arts, carved handicrafts, and complete contract work for your projects
+                  </p>
+                  
+                  <motion.a
+                    href="/products"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="inline-flex items-center px-8 py-3 bg-gold text-charcoal font-semibold tracking-wide hover:bg-gold-light transition-all duration-300 shadow-lg hover:shadow-xl group"
+                  >
+                    EXPLORE OUR PRODUCTS
+                    <svg 
+                      className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </motion.a>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+
           {loading ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>

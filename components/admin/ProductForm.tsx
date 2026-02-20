@@ -37,9 +37,23 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
   useEffect(() => {
     if (product) {
       setFormData({
-        ...product,
-        features: product.features && product.features.length > 0 ? product.features : [''],
+        name: product.name || '',
+        description: product.description || '',
+        image_url: product.image_url || '',
         images: product.images && product.images.length > 0 ? product.images : [''],
+        video_url: product.video_url || '',
+        stone_type_id: product.stone_type_id || '',
+        origin: product.origin || '',
+        features: product.features && product.features.length > 0 ? product.features : [''],
+        customizable: product.customizable !== undefined ? product.customizable : true,
+        price_type: product.price_type || 'quote',
+        base_price: product.base_price?.toString() || '',
+        min_price: product.min_price?.toString() || '',
+        max_price: product.max_price?.toString() || '',
+        price_unit: product.price_unit || 'per sq ft',
+        whatsapp_link: product.whatsapp_link || '',
+        display_order: product.display_order || 0,
+        visible: product.visible !== undefined ? product.visible : true,
       })
     }
   }, [product])
@@ -50,14 +64,23 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
 
     try {
       const dataToSave = {
-        ...formData,
-        features: formData.features.filter(f => f.trim() !== ''),
+        name: formData.name,
+        description: formData.description,
+        image_url: formData.image_url,
         images: formData.images.filter(img => img.trim() !== ''),
+        video_url: formData.video_url || null,
         stone_type_id: formData.stone_type_id || null,
+        origin: formData.origin,
+        features: formData.features.filter(f => f.trim() !== ''),
+        customizable: formData.customizable,
+        price_type: formData.price_type,
         base_price: formData.base_price ? parseFloat(formData.base_price as string) : null,
         min_price: formData.min_price ? parseFloat(formData.min_price as string) : null,
         max_price: formData.max_price ? parseFloat(formData.max_price as string) : null,
+        price_unit: formData.price_unit,
         whatsapp_link: formData.whatsapp_link || null,
+        display_order: formData.display_order,
+        visible: formData.visible,
       }
 
       if (product) {

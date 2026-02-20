@@ -84,12 +84,20 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.9 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
           <a
             href="/portfolio"
             className="inline-block px-10 py-4 bg-gold text-charcoal font-semibold tracking-wide hover:bg-gold-light transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             EXPLORE OUR WORK
+          </a>
+          
+          <a
+            href="/products"
+            className="inline-block px-10 py-4 border-2 border-gold text-gold font-semibold tracking-wide hover:bg-gold hover:text-charcoal transition-all duration-300 shadow-lg"
+          >
+            EXPLORE OUR PRODUCTS
           </a>
         </motion.div>
       </motion.div>

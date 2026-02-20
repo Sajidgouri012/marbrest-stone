@@ -2,51 +2,75 @@
 
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
 
-const projects = [
-  {
-    id: 1,
-    title: 'Royal Palace Entrance',
-    location: 'Dubai, UAE',
-    image: 'https://images.unsplash.com/photo-1600607687644-c7171b42498b?q=80&w=2053&auto=format&fit=crop',
-    description: 'Exquisite Calacatta marble installation with gold inlay detailing.',
-  },
-  {
-    id: 2,
-    title: 'Luxury Hotel Lobby',
-    location: 'London, UK',
-    image: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070&auto=format&fit=crop',
-    description: 'Floor-to-ceiling Statuario marble with custom lighting integration.',
-  },
-  {
-    id: 3,
-    title: 'Private Residence',
-    location: 'New York, USA',
-    image: 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?q=80&w=2070&auto=format&fit=crop',
-    description: 'Bespoke kitchen countertops in rare Emperador marble.',
-  },
-  {
-    id: 4,
-    title: 'Corporate Headquarters',
-    location: 'Singapore',
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053&auto=format&fit=crop',
-    description: 'Modern minimalist design with Nero Marquina and white Carrara.',
-  },
-]
+interface Project {
+  id: string
+  title: string
+  location: string
+  image_url: string
+  description: string
+  category: string
+}
 
 export default function FeaturedProjects() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('visible', true)
+          .order('display_order', { ascending: true })
+          .limit(5)
+
+        if (error) throw error
+        setProjects(data || [])
+      } catch (error) {
+        console.error('Error fetching projects:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProjects()
+  }, [])
 
   const nextProject = () => {
-    setCurrentIndex((prev) => (prev + 1) % projects.length)
+    if (projects.length > 0) {
+      setCurrentIndex((prev) => (prev + 1) % projects.length)
+    }
   }
 
   const prevProject = () => {
-    setCurrentIndex((prev) => (prev - 1 + projects.length) % projects.length)
+    if (projects.length > 0) {
+      setCurrentIndex((prev) => (prev - 1 + projects.length) % projects.length)
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="py-12 md:py-16 px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="h-[600px] flex items-center justify-center">
+            <div className="text-gray-400">Loading projects...</div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (projects.length === 0) {
+    return null
   }
 
   return (
@@ -54,7 +78,7 @@ export default function FeaturedProjects() {
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
@@ -74,14 +98,14 @@ export default function FeaturedProjects() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="relative h-[500px] md:h-[600px] rounded-sm overflow-hidden shadow-2xl"
+            className="relative h-[500px] md:h-[600px] rounded-sm overflow-hidden shadow-2xl bg-black"
           >
             <img
-              src={projects[currentIndex].image}
+              src={projects[currentIndex].image_url}
               alt={projects[currentIndex].title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/50 to-transparent pointer-events-none" />
             
             <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
               <motion.div
@@ -118,29 +142,31 @@ export default function FeaturedProjects() {
             <ChevronRight size={24} />
           </button>
 
-          <div className="flex justify-center mt-8 space-x-2">
-            {projects.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentIndex ? 'w-8 bg-gold' : 'w-2 bg-gray-400'
-                }`}
-                aria-label={`Go to project ${index + 1}`}
-              />
-            ))}
-          </div>
+          {projects.length > 1 && (
+            <div className="flex justify-center mt-8 space-x-2">
+              {projects.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex ? 'w-8 bg-gold' : 'w-2 bg-gray-400'
+                  }`}
+                  aria-label={`Go to project ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-center mt-12"
         >
           <a
             href="/portfolio"
-            className="inline-block px-8 py-3 border-2 border-charcoal text-charcoal font-semibold tracking-wide hover:bg-charcoal hover:text-white transition-all duration-300"
+            className="inline-block px-8 py-3 border-2 border-charcoal text-charcoal font-semibold tracking-wide hover:bg-charcoal hover:text-white transition-all duration-300 shadow-sm"
           >
             VIEW ALL PROJECTS
           </a>

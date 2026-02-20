@@ -44,6 +44,8 @@ export default function ProductDetailModal({
   const [showQuoteModal, setShowQuoteModal] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [isPlayingVideo, setIsPlayingVideo] = useState(false)
+  const [selectedImageForModal, setSelectedImageForModal] = useState<string | null>(null)
+  const [isPlayingVideoInFullscreen, setIsPlayingVideoInFullscreen] = useState(false)
 
   // Build gallery: combine main image + additional images (if any)
   const buildImageGallery = () => {
@@ -68,6 +70,8 @@ export default function ProductDetailModal({
   }
 
   const images = buildImageGallery()
+  const hasVideo = !!product.video_url
+  const isLastImage = selectedImageIndex === images.length - 1
 
   const handleAddToCart = () => {
     alert('Add to cart functionality coming soon!')
@@ -132,10 +136,10 @@ export default function ProductDetailModal({
             </button>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8">
-              {/* Left Side - Image Gallery or Video Player */}
+              {/* Left Side - Image Gallery with Video */}
               <div className="space-y-4">
                 {isPlayingVideo && product.video_url ? (
-                  /* Inline Video Player */
+                  /* Video Player - replaces main image only */
                   <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
                     <iframe
                       src={getVideoEmbedUrl(product.video_url)}
@@ -155,10 +159,13 @@ export default function ProductDetailModal({
                     </button>
                   </div>
                 ) : (
-                  /* Image Gallery */
+                  /* Main Image */
                   <>
                     {/* Main Image */}
-                    <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square">
+                    <div 
+                      className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square cursor-pointer"
+                      onClick={() => setSelectedImageForModal(images[selectedImageIndex])}
+                    >
                       <img
                         src={images[selectedImageIndex]}
                         alt={product.name}
@@ -171,26 +178,44 @@ export default function ProductDetailModal({
                         </div>
                       )}
 
-                      {product.video_url && (
+                      {/* Show video play button only on last image if video exists */}
+                      {hasVideo && isLastImage && (
                         <button
-                          onClick={handlePlayVideo}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handlePlayVideo()
+                          }}
                           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold text-charcoal p-4 rounded-full hover:scale-110 transition-transform shadow-lg"
                         >
                           <Play size={32} fill="currentColor" />
                         </button>
                       )}
 
-                      {/* Navigation Arrows (if multiple images) */}
-                      {images.length > 1 && (
+                      {/* Video badge on last image */}
+                      {hasVideo && isLastImage && (
+                        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                          <Play size={14} className="text-white" fill="white" />
+                          <span className="text-white text-xs font-medium">VIDEO</span>
+                        </div>
+                      )}
+
+                      {/* Navigation Arrows (if multiple images or video) */}
+                      {(images.length > 1 || hasVideo) && (
                         <>
                           <button
-                            onClick={prevImage}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              prevImage()
+                            }}
                             className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
                           >
                             <ChevronLeft size={24} className="text-charcoal" />
                           </button>
                           <button
-                            onClick={nextImage}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              nextImage()
+                            }}
                             className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
                           >
                             <ChevronRight size={24} className="text-charcoal" />
@@ -199,29 +224,45 @@ export default function ProductDetailModal({
                       )}
                     </div>
 
-                    {/* Thumbnail Gallery (if multiple images) */}
-                    {images.length > 1 && (
-                      <div className="grid grid-cols-4 gap-2">
-                        {images.map((img, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setSelectedImageIndex(idx)}
-                            className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                              selectedImageIndex === idx
-                                ? 'border-gold'
-                                : 'border-transparent hover:border-gray-300'
-                            }`}
-                          >
-                            <img
-                              src={img}
-                              alt={`${product.name} ${idx + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </>
+                )}
+
+                {/* Thumbnail Gallery - Always visible (if multiple images or video) */}
+                {(images.length > 1 || hasVideo) && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {images.map((img, idx) => {
+                      const isLastThumb = idx === images.length - 1
+                      const showVideoIcon = hasVideo && isLastThumb
+                      
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setSelectedImageIndex(idx)
+                            if (isPlayingVideo) {
+                              setIsPlayingVideo(false)
+                            }
+                          }}
+                          className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                            selectedImageIndex === idx && !isPlayingVideo
+                              ? 'border-gold'
+                              : 'border-transparent hover:border-gray-300'
+                          }`}
+                        >
+                          <img
+                            src={img}
+                            alt={`${product.name} ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          {showVideoIcon && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <Play size={20} className="text-white" fill="white" />
+                            </div>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
                 )}
               </div>
 
@@ -299,6 +340,149 @@ export default function ProductDetailModal({
             productId={product.id}
             productName={product.name}
           />
+        )}
+
+        {/* Fullscreen Image/Video Modal */}
+        {selectedImageForModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (!isPlayingVideoInFullscreen) {
+                setSelectedImageForModal(null)
+              }
+            }}
+          >
+            {isPlayingVideoInFullscreen && product.video_url ? (
+              /* Fullscreen Video Player */
+              <div 
+                className="relative w-full h-full flex items-center justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="relative w-full max-w-7xl aspect-video">
+                  <iframe
+                    src={getVideoEmbedUrl(product.video_url)}
+                    className="w-full h-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowFullScreen
+                    title={`${product.name} video`}
+                  />
+                  
+                  {/* Close Video Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsPlayingVideoInFullscreen(false)
+                      setSelectedImageForModal(null)
+                    }}
+                    className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full transition-colors z-10"
+                    title="Close video"
+                  >
+                    <X size={24} />
+                  </button>
+
+                  {/* Minimize Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsPlayingVideoInFullscreen(false)
+                      setSelectedImageForModal(null)
+                      setIsPlayingVideo(true)
+                    }}
+                    className="absolute top-4 right-20 bg-black/60 hover:bg-black/80 text-white px-4 py-2 rounded-full transition-colors z-10 text-sm font-medium"
+                    title="Minimize to product view"
+                  >
+                    Minimize
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Fullscreen Image View */
+              <>
+                {/* Close Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedImageForModal(null)
+                  }}
+                  className="absolute top-4 right-4 text-white hover:text-gold transition-colors z-10"
+                >
+                  <X size={32} />
+                </button>
+
+                {/* Navigation Arrows */}
+                {(images.length > 1 || hasVideo) && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const newIndex = selectedImageIndex === 0 ? images.length - 1 : selectedImageIndex - 1
+                        setSelectedImageIndex(newIndex)
+                        setSelectedImageForModal(images[newIndex])
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-colors z-10"
+                    >
+                      <ChevronLeft size={32} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const newIndex = selectedImageIndex === images.length - 1 ? 0 : selectedImageIndex + 1
+                        setSelectedImageIndex(newIndex)
+                        setSelectedImageForModal(images[newIndex])
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-colors z-10"
+                    >
+                      <ChevronRight size={32} />
+                    </button>
+                  </>
+                )}
+
+                {/* Video Play Button (if on last image and has video) */}
+                {hasVideo && selectedImageIndex === images.length - 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsPlayingVideoInFullscreen(true)
+                    }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold text-charcoal p-6 rounded-full hover:scale-110 transition-transform shadow-2xl z-10"
+                  >
+                    <Play size={40} fill="currentColor" />
+                  </button>
+                )}
+                
+                <div 
+                  className="relative flex items-center justify-center w-full h-full"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <motion.img
+                    key={selectedImageForModal}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    src={selectedImageForModal}
+                    alt={product.name}
+                    className="max-w-full max-h-[calc(100vh-8rem)] object-contain"
+                  />
+                  <div className="absolute bottom-4 left-4 right-4 bg-gradient-to-t from-black/80 to-transparent p-4 rounded">
+                    <h3 className="text-white text-xl md:text-2xl font-serif font-bold">
+                      {product.name}
+                      {hasVideo && selectedImageIndex === images.length - 1 && (
+                        <span className="ml-3 text-sm text-gold">• Video Available</span>
+                      )}
+                    </h3>
+                    <p className="text-white/80 text-sm mt-1">
+                      Image {selectedImageIndex + 1} of {images.length}
+                      {hasVideo && selectedImageIndex === images.length - 1 && ' • Click play to watch video'}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </motion.div>
         )}
       </motion.div>
     </AnimatePresence>

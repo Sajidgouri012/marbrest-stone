@@ -280,15 +280,21 @@ export default function ProductsPage() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6">
-              Our Products
+              Our Products & Services
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Discover our exquisite collection of marble, granite, and stone. Each piece can be customized 
-              to your exact specifications - from dimensions to finishes.
+              Premium marble, granite & stone products • Marble flooring installations • Temple & mosque artistry • 
+              Carved handicrafts • Home decor • Complete contract work for residential & commercial projects
             </p>
-            <div className="inline-flex items-center space-x-2 px-6 py-3 bg-gold/10 border border-gold/30 rounded-full">
-              <Sparkles className="text-gold" size={20} />
-              <span className="text-gold font-medium">All Products Fully Customizable</span>
+            <div className="flex flex-wrap justify-center gap-3">
+              <div className="inline-flex items-center space-x-2 px-6 py-3 bg-gold/10 border border-gold/30 rounded-full">
+                <Sparkles className="text-gold" size={20} />
+                <span className="text-gold font-medium">Fully Customizable</span>
+              </div>
+              <div className="inline-flex items-center space-x-2 px-6 py-3 bg-gold/10 border border-gold/30 rounded-full">
+                <Check className="text-gold" size={20} />
+                <span className="text-gold font-medium">Contract Work Available</span>
+              </div>
             </div>
           </motion.div>
         </div>

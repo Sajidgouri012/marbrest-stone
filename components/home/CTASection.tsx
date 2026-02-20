@@ -55,6 +55,13 @@ export default function CTASection() {
             >
               VIEW PORTFOLIO
             </a>
+
+            <a
+              href="/products"
+              className="inline-block px-10 py-4 border-2 border-gold text-gold font-semibold tracking-wide hover:bg-gold hover:text-charcoal transition-all duration-300"
+            >
+              EXPLORE PRODUCTS
+            </a>
           </motion.div>
         </motion.div>
 
