@@ -17,6 +17,7 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
     name: '',
     description: '',
     image_url: '',
+    images: [''],
     video_url: '',
     stone_type_id: '',
     origin: '',
@@ -38,6 +39,7 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
       setFormData({
         ...product,
         features: product.features && product.features.length > 0 ? product.features : [''],
+        images: product.images && product.images.length > 0 ? product.images : [''],
       })
     }
   }, [product])
@@ -50,6 +52,7 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
       const dataToSave = {
         ...formData,
         features: formData.features.filter(f => f.trim() !== ''),
+        images: formData.images.filter(img => img.trim() !== ''),
         stone_type_id: formData.stone_type_id || null,
         base_price: formData.base_price ? parseFloat(formData.base_price as string) : null,
         min_price: formData.min_price ? parseFloat(formData.min_price as string) : null,
@@ -102,6 +105,27 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
     setFormData(prev => ({
       ...prev,
       features: prev.features.filter((_, i) => i !== index),
+    }))
+  }
+
+  const handleImageChange = (index: number, value: string) => {
+    setFormData(prev => {
+      const newImages = [...prev.images]
+      newImages[index] = value
+      return { ...prev, images: newImages }
+    })
+  }
+
+  const addImage = () => {
+    if (formData.images.length < 5) {
+      setFormData(prev => ({ ...prev, images: [...prev.images, ''] }))
+    }
+  }
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
     }))
   }
 
@@ -160,7 +184,7 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
 
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-2">
-              Image URL *
+              Main Image URL *
             </label>
             <input
               type="url"
@@ -171,6 +195,46 @@ export default function ProductForm({ product, stoneTypes, onClose, onSave }: Pr
               className="w-full px-4 py-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
               placeholder="https://example.com/image.jpg"
             />
+            <p className="text-xs text-gray-500 mt-1">Primary product image (shown in grid)</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-charcoal mb-2">
+              Additional Images (Max 4)
+            </label>
+            <div className="space-y-2">
+              {formData.images.map((image, index) => (
+                <div key={index} className="flex space-x-2">
+                  <input
+                    type="url"
+                    value={image}
+                    onChange={(e) => handleImageChange(index, e.target.value)}
+                    className="flex-1 px-4 py-2 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none"
+                    placeholder={`Image ${index + 1} URL (optional)`}
+                  />
+                  {formData.images.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="px-3 py-2 bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {formData.images.length < 5 && (
+                <button
+                  type="button"
+                  onClick={addImage}
+                  className="flex items-center space-x-1 text-sm text-gold hover:text-gold-light font-semibold"
+                >
+                  <Plus size={16} />
+                  <span>Add Image ({formData.images.length}/5)</span>
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Add up to 4 additional images for the gallery (5 total with main image)</p>
           </div>
 
           <div>

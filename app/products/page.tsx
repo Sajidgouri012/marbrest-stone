@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { Check, Sparkles, Play, X } from 'lucide-react'
+import { Check, Sparkles, Play, X, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import ProductPrice from '@/components/ProductPrice'
-import QuoteRequestModal from '@/components/QuoteRequestModal'
+import ProductDetailModal from '@/components/ProductDetailModal'
 
 interface StoneType {
   id: string
@@ -23,6 +22,7 @@ interface Product {
   name: string
   description: string
   image_url: string
+  images?: string[]
   video_url?: string
   stone_type_id: string
   stone_type?: StoneType
@@ -46,6 +46,7 @@ export default function ProductsPage() {
   const [showCategories, setShowCategories] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   // Fallback stone types
   const fallbackStoneTypes: StoneType[] = [
@@ -360,16 +361,16 @@ export default function ProductsPage() {
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-gray-600 text-lg">No products found in this category.</p>
+              <p className="text-gray-600 text-lg">No products found.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredProducts.map((product, index) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
+                <ProductCard
+                  key={product.id}
+                  product={product}
                   index={index}
-                  onVideoClick={setSelectedVideo}
+                  onProductClick={() => setSelectedProduct(product)}
                 />
               ))}
             </div>
@@ -418,6 +419,15 @@ export default function ProductsPage() {
           getEmbedUrl={getVideoEmbedUrl}
         />
       )}
+
+      {selectedProduct && (
+        <ProductDetailModal
+          product={selectedProduct}
+          isOpen={!!selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onVideoClick={setSelectedVideo}
+        />
+      )}
     </div>
   )
 }
@@ -425,101 +435,91 @@ export default function ProductsPage() {
 function ProductCard({ 
   product, 
   index,
-  onVideoClick
+  onProductClick
 }: { 
   product: Product
   index: number
-  onVideoClick: (url: string) => void
+  onProductClick: () => void
 }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const [showQuoteModal, setShowQuoteModal] = useState(false)
 
-  const handleAddToCart = () => {
-    alert('Add to cart functionality coming soon!')
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price)
+  }
+
+  const getPriceDisplay = () => {
+    if (product.price_type === 'fixed' && product.base_price) {
+      return formatPrice(product.base_price)
+    } else if (product.price_type === 'range' && product.min_price) {
+      return `From ${formatPrice(product.min_price)}`
+    } else {
+      return 'Request Quote'
+    }
   }
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group relative overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300"
+      transition={{ duration: 0.4, delay: index * 0.05 }}
+      onClick={onProductClick}
+      className="group relative bg-white border border-gray-200 hover:border-gold hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
     >
-      <div className="relative h-72 overflow-hidden">
+      {/* Image */}
+      <div className="relative aspect-square overflow-hidden bg-gray-100">
         <img
           src={product.image_url}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/50 to-transparent opacity-60" />
         
-        {product.customizable && (
-          <div className="absolute top-4 right-4 bg-gold px-3 py-1 rounded-full">
-            <span className="text-charcoal text-xs font-bold">CUSTOMIZABLE</span>
+        {/* Badges */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1">
+          {product.customizable && (
+            <div className="bg-gold px-2 py-0.5 rounded text-charcoal text-[10px] font-bold">
+              CUSTOM
+            </div>
+          )}
+          {product.video_url && (
+            <div className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1">
+              <Play size={10} className="text-white" fill="white" />
+              <span className="text-white text-[10px] font-medium">VIDEO</span>
+            </div>
+          )}
+        </div>
+
+        {/* Quick View Overlay */}
+        <div className="absolute inset-0 bg-charcoal/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-white text-sm font-semibold">
+            <Eye size={18} />
+            <span>View Details</span>
           </div>
-        )}
-
-        {product.video_url && (
-          <>
-            <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center space-x-1.5 group-hover:opacity-0 transition-opacity duration-300">
-              <Play size={14} className="text-white" fill="white" />
-              <span className="text-white text-xs font-medium">Video</span>
-            </div>
-            
-            <button
-              onClick={() => onVideoClick(product.video_url!)}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold text-charcoal p-4 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
-            >
-              <Play size={24} fill="currentColor" />
-            </button>
-          </>
-        )}
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <h3 className="text-2xl font-serif font-bold text-white mb-1">
-            {product.name}
-          </h3>
-          <p className="text-gold text-sm font-medium">{product.origin}</p>
         </div>
       </div>
 
-      <div className="p-6">
-        <p className="text-gray-600 text-sm leading-relaxed mb-4">
-          {product.description}
-        </p>
-
-        <div className="space-y-2 mb-4">
-          {product.features.map((feature, idx) => (
-            <div key={idx} className="flex items-center space-x-2">
-              <Check className="text-gold flex-shrink-0" size={16} />
-              <span className="text-sm text-gray-700">{feature}</span>
-            </div>
-          ))}
+      {/* Product Info */}
+      <div className="p-3">
+        <h3 className="font-semibold text-charcoal text-sm mb-1 line-clamp-2 group-hover:text-gold transition-colors">
+          {product.name}
+        </h3>
+        <p className="text-xs text-gray-500 mb-2">{product.origin}</p>
+        
+        {/* Price */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold text-charcoal">
+            {getPriceDisplay()}
+          </span>
+          {product.price_unit && product.price_type !== 'quote' && (
+            <span className="text-[10px] text-gray-500">{product.price_unit}</span>
+          )}
         </div>
-
-        <ProductPrice
-          priceType={product.price_type}
-          basePrice={product.base_price}
-          minPrice={product.min_price}
-          maxPrice={product.max_price}
-          priceUnit={product.price_unit}
-          whatsappLink={product.whatsapp_link}
-          productName={product.name}
-          onRequestQuote={() => setShowQuoteModal(true)}
-          onAddToCart={handleAddToCart}
-        />
       </div>
-
-      {showQuoteModal && (
-        <QuoteRequestModal
-          isOpen={showQuoteModal}
-          onClose={() => setShowQuoteModal(false)}
-          productId={product.id}
-          productName={product.name}
-        />
-      )}
     </motion.div>
   )
 }

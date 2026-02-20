@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS products (
   name TEXT NOT NULL,
   description TEXT NOT NULL,
   image_url TEXT NOT NULL,
+  images TEXT[] DEFAULT '{}',
   video_url TEXT,
   stone_type_id UUID REFERENCES stone_types(id) ON DELETE SET NULL,
   origin TEXT NOT NULL,
@@ -351,3 +352,6 @@ CREATE POLICY "Allow all operations on quote_requests"
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS max_price DECIMAL(10, 2);
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS price_unit TEXT DEFAULT 'per sq ft';
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS whatsapp_link TEXT;
+
+-- Add images array column to products table (supports up to 5 images)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
