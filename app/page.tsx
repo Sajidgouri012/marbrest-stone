@@ -6,6 +6,7 @@ import HeroSection from '@/components/home/HeroSection'
 import CraftsmanshipVideo from '@/components/home/CraftsmanshipVideo'
 import HeritageSection from '@/components/home/HeritageSection'
 import FeaturedProjects from '@/components/home/FeaturedProjects'
+import CraftsmanshipPreview from '@/components/home/CraftsmanshipPreview'
 import FeaturedProductsSection from '@/components/home/FeaturedProductsSection'
 import CTASection from '@/components/home/CTASection'
 
@@ -23,6 +24,7 @@ export default function Home() {
       <CraftsmanshipVideo />
       <HeritageSection />
       <FeaturedProjects />
+      <CraftsmanshipPreview />
       <FeaturedProductsSection />
       <CTASection />
     </div>

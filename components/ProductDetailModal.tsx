@@ -13,8 +13,8 @@ interface Product {
   image_url: string
   images?: string[]
   video_url?: string
-  stone_type_id: string
-  stone_type?: {
+  product_category_id: string
+  product_category?: {
     id: string
     name: string
   }
@@ -275,9 +275,9 @@ export default function ProductDetailModal({
                       {product.name}
                     </h1>
                     <p className="text-gold font-medium text-lg">{product.origin}</p>
-                    {product.stone_type && (
+                    {product.product_category && (
                       <p className="text-gray-600 text-sm mt-1">
-                        Category: <span className="font-semibold">{product.stone_type.name}</span>
+                        Category: <span className="font-semibold">{product.product_category.name}</span>
                       </p>
                     )}
                   </div>

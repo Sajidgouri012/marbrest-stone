@@ -11,7 +11,7 @@ interface Product {
   name: string
   description: string
   image_url: string
-  stone_type?: {
+  product_category?: {
     name: string
   }
   price_type: 'fixed' | 'range' | 'quote'
@@ -35,7 +35,7 @@ export default function FeaturedProductsSection() {
           .from('products')
           .select(`
             *,
-            stone_type:stone_types(name)
+            product_category:products_categories(name)
           `)
           .eq('visible', true)
           .order('display_order', { ascending: true })
@@ -119,9 +119,9 @@ export default function FeaturedProductsSection() {
               </div>
               
               <div className="p-6">
-                {product.stone_type && (
+                {product.product_category && (
                   <span className="text-xs text-gold font-semibold tracking-wider uppercase">
-                    {product.stone_type.name}
+                    {product.product_category.name}
                   </span>
                 )}
                 <h3 className="text-xl font-serif font-bold text-charcoal mt-2 mb-2 group-hover:text-gold transition-colors">

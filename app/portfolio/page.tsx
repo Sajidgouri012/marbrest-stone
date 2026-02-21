@@ -175,7 +175,7 @@ export default function PortfolioPage() {
           )}
 
           {/* Products CTA Banner - Top Position */}
-          <div className="mb-12 -mx-6 lg:-mx-8">
+          <div className="mb-8 -mx-6 lg:-mx-8">
             <div className="py-12 px-6 lg:px-8 bg-gradient-to-br from-charcoal via-charcoal to-gray-900 relative overflow-hidden">
               <div className="absolute inset-0 opacity-5">
                 <div className="absolute inset-0" style={{
@@ -220,6 +220,54 @@ export default function PortfolioPage() {
             </div>
           </div>
 
+          {/* Craftsmanship CTA Banner */}
+          <div className="mb-12 -mx-6 lg:-mx-8">
+            <div className="py-10 px-6 lg:px-8 bg-gradient-to-r from-gold/10 via-gold/5 to-gold/10 border-y border-gold/20 relative overflow-hidden">
+              <div className="relative z-10 max-w-4xl mx-auto text-center">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/20 border border-gold/40 rounded-full mb-3">
+                    <svg className="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-gold font-semibold text-xs uppercase tracking-wider">Behind the Scenes</span>
+                  </div>
+                  
+                  <h3 className="text-xl md:text-2xl font-serif font-bold text-charcoal mb-2">
+                    See How We Create These Masterpieces
+                  </h3>
+                  <p className="text-sm md:text-base text-gray-600 mb-5 max-w-2xl mx-auto">
+                    Watch our skilled craftsmen at work - from raw stone to finished art
+                  </p>
+                  
+                  <motion.a
+                    href="/craftsmanship"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="inline-flex items-center px-6 py-2.5 bg-charcoal text-white font-semibold tracking-wide hover:bg-gold hover:text-charcoal transition-all duration-300 group text-sm"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                    VIEW OUR WORK PROCESS
+                    <svg 
+                      className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </motion.a>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+
           {loading ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
@@ -230,7 +278,7 @@ export default function PortfolioPage() {
               <p className="text-gray-600 text-lg">No projects found in this category.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {filteredProjects.map((project, index) => (
                 <ProjectCard
                   key={project.id}
