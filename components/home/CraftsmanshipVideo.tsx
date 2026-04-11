@@ -28,13 +28,22 @@ export default function CraftsmanshipVideo() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <div className="relative aspect-video bg-charcoal rounded-sm overflow-hidden shadow-2xl group">
+          > */}
+          <div className="relative aspect-video bg-charcoal rounded-sm overflow-hidden shadow-2xl">
+            <iframe
+              className="w-full h-full"
+              src="https://drive.google.com/file/d/1x4qj_UXGADoOITlAqfiOHZPGOYCWyphQ/preview"
+              title="Craftsmanship Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+            {/* <div className="relative aspect-video bg-charcoal rounded-sm overflow-hidden shadow-2xl group">
               {!isPlaying ? (
                 <>
                   <img
@@ -69,7 +78,7 @@ export default function CraftsmanshipVideo() {
                 />
               )}
             </div>
-          </motion.div>
+          </motion.div> */}
 
           <motion.div
             initial={{ opacity: 0, x: 30 }}
