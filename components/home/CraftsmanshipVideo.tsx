@@ -38,7 +38,8 @@ export default function CraftsmanshipVideo() {
               {!isPlaying ? (
                 <>
                   <img
-                    src="https://images.unsplash.com/photo-1590642916589-592bca10dfbf?q=80&w=2070&auto=format&fit=crop"
+                    // src="https://images.unsplash.com/photo-1590642916589-592bca10dfbf?q=80&w=2070&auto=format&fit=crop"
+                    src="/marbrest_logo.png"
                     alt="Marble craftsmanship"
                     className="w-full h-full object-cover"
                   />
