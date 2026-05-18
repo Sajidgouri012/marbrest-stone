@@ -104,9 +104,9 @@ export default function FeaturedProjects() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16 fade-up"
         >
-          <span className="text-gold text-sm font-semibold tracking-widest uppercase">Portfolio</span>
+          <span className="text-gold text-sm font-semibold tracking-wider sm:tracking-widest uppercase">Portfolio</span>
           <div className="h-px w-16 bg-gold mx-auto mt-2 mb-6" />
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-charcoal mb-4">
             Featured Projects
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -165,10 +165,10 @@ export default function FeaturedProjects() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <div className="text-gold text-sm font-semibold tracking-widest uppercase mb-2">
+                <div className="text-gold text-sm font-semibold tracking-wider sm:tracking-widest uppercase mb-2">
                   {projects[currentIndex].location}
                 </div>
-                <h3 className="text-3xl md:text-4xl font-serif font-bold mb-3">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold mb-3">
                   {projects[currentIndex].title}
                 </h3>
                 <p className="text-gray-300 max-w-2xl">

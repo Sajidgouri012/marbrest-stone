@@ -89,7 +89,7 @@ export default function FeaturedProductsSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12 fade-up"
         >
-          <span className="text-[#B8962E] text-sm font-semibold tracking-widest uppercase">Products &amp; Services</span>
+          <span className="text-[#B8962E] text-sm font-semibold tracking-wider sm:tracking-widest uppercase">Products &amp; Services</span>
           <div className="h-px w-16 bg-[#B8962E] mx-auto mt-2 mb-6" />
           <h2 className="font-serif font-bold text-charcoal mb-4">
             Premium Stones &amp; Craftsmanship
@@ -126,7 +126,7 @@ export default function FeaturedProductsSection() {
                     {product.product_category.name}
                   </span>
                 )}
-                <h3 className="text-xl font-serif font-bold text-charcoal mt-2 mb-2 group-hover:text-gold transition-colors">
+                <h3 className="text-lg sm:text-xl font-serif font-bold text-charcoal mt-2 mb-2 group-hover:text-gold transition-colors">
                   {product.name}
                 </h3>
                 <p className="text-sm text-gray-600 line-clamp-2 mb-4">

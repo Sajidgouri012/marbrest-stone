@@ -177,7 +177,7 @@ export default function Navigation() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="lg:hidden fixed top-0 right-0 bottom-0 w-[85vw] max-w-sm z-50 bg-[#1A1A1A] flex flex-col overflow-y-auto"
+              className="lg:hidden fixed top-0 right-0 bottom-0 w-[72vw] max-w-[280px] z-50 bg-[#1A1A1A] flex flex-col overflow-y-auto"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 h-16 border-b border-white/10 flex-shrink-0">
@@ -205,7 +205,7 @@ export default function Navigation() {
                     <Link
                       href={link.href}
                       onClick={closeMenu}
-                      className={`block py-5 text-[1.5rem] font-serif font-medium border-b border-white/10 transition-colors ${
+                      className={`block py-3 text-base font-serif font-medium border-b border-white/10 transition-colors ${
                         pathname === link.href ? 'text-[#B8962E]' : 'text-white hover:text-[#B8962E]'
                       }`}
                     >

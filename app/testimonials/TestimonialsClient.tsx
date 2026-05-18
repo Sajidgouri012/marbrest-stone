@@ -150,7 +150,7 @@ function TestimonialCard({
         </div>
 
         {testimonial.project_type && (
-          <div className="mt-3 text-[10px] text-gray-400 uppercase tracking-widest">
+          <div className="mt-3 text-[10px] text-gray-400 uppercase tracking-wider sm:tracking-widest">
             {testimonial.project_type}
           </div>
         )}

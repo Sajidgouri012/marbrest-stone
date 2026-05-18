@@ -94,10 +94,10 @@ export default function ProductsClient({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-6">
               Our Marble & Stone Products — Fully Customizable, Export-Ready
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-300 max-w-3xl mx-auto mb-8">
               Premium marble, granite & stone products • Marble flooring installations • Mosque & temple artistry •
               Carved handicrafts • Home decor • Complete contract work for residential & commercial projects
             </p>
@@ -194,12 +194,12 @@ export default function ProductsClient({
             >
               <div
                 className={`${
-                  isSidebarOpen ? 'absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto' : ''
+                  isSidebarOpen ? 'absolute left-0 top-0 bottom-0 w-[72vw] max-w-[260px] bg-white shadow-2xl overflow-y-auto' : ''
                 } lg:sticky lg:top-24 lg:bg-gray-50 lg:p-6 lg:rounded-lg lg:shadow-sm`}
               >
                 {isSidebarOpen && (
-                  <div className="lg:hidden flex items-center justify-between p-6 border-b border-gray-200 bg-charcoal text-white">
-                    <h3 className="text-lg font-semibold">Filter Products</h3>
+                  <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 bg-charcoal text-white">
+                    <h3 className="text-sm font-semibold">Filter Products</h3>
                     <button
                       onClick={() => setIsSidebarOpen(false)}
                       className="p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -209,18 +209,18 @@ export default function ProductsClient({
                   </div>
                 )}
 
-                <div className="p-6 lg:p-0">
-                  <h3 className="text-sm font-bold text-charcoal uppercase tracking-wider mb-4 hidden lg:block">Categories</h3>
+                <div className="p-4 lg:p-0">
+                  <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3 hidden lg:block">Categories</h3>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <button
                       onClick={() => { setSelectedCategory('all'); setIsSidebarOpen(false) }}
-                      className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-between group ${
+                      className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-between group ${
                         selectedCategory === 'all' ? 'bg-gold text-charcoal shadow-md' : 'text-gray-700 hover:bg-gray-100'
                       }`}
                     >
                       <span>All Products</span>
-                      {selectedCategory === 'all' && <ChevronRight size={18} className="text-charcoal" />}
+                      {selectedCategory === 'all' && <ChevronRight size={16} className="text-charcoal" />}
                     </button>
 
                     {showCategories && productCategories.map((category) => (
@@ -228,10 +228,10 @@ export default function ProductsClient({
                         key={category.slug}
                         href={`/products/${category.slug}`}
                         onClick={() => setIsSidebarOpen(false)}
-                        className="w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-between group text-gray-700 hover:bg-gray-100 hover:text-[#B8962E]"
+                        className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-between group text-gray-700 hover:bg-gray-100 hover:text-[#B8962E]"
                       >
                         <span>{category.name}</span>
-                        <ChevronRight size={18} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#B8962E]" />
+                        <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#B8962E]" />
                       </Link>
                     ))}
                   </div>
@@ -293,10 +293,10 @@ export default function ProductsClient({
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif font-bold mb-6">
               Need Something <span className="text-gold">Unique?</span>
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-300 mb-8">
               Every piece can be customized to your exact requirements. Choose your dimensions,
               finish, edge profile, and more. Our master craftsmen will bring your vision to life.
             </p>

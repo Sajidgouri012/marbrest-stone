@@ -37,7 +37,7 @@ function AccordionSection({
       </button>
 
       {/* Desktop: always visible heading */}
-      <h4 className="hidden md:block font-serif text-lg text-white mb-4">{title}</h4>
+      <h4 className="hidden md:block font-serif text-base sm:text-lg text-white mb-4">{title}</h4>
 
       {/* Content — accordion on mobile, always visible on md+ */}
       <div
@@ -78,7 +78,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 md:gap-12">
           {/* Brand column — always visible */}
           <div className="py-6 md:py-0 border-b border-gray-800 md:border-0">
-            <h3 className="text-2xl font-serif font-bold mb-3">
+            <h3 className="text-lg sm:text-xl lg:text-2xl font-serif font-bold mb-3">
               <span className="text-white">MARBREST</span>
               <span className="text-[#B8962E] ml-2">STONE</span>
             </h3>
