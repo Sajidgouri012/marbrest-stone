@@ -36,11 +36,12 @@ export default function CraftsmanshipVideo() {
           > */}
           <div className="relative aspect-video bg-charcoal rounded-sm overflow-hidden shadow-2xl">
             <iframe
-              className="w-full h-full"
-              src="https://drive.google.com/file/d/1x4qj_UXGADoOITlAqfiOHZPGOYCWyphQ/preview"
-              title="Craftsmanship Video"
+              src="https://www.youtube.com/embed/nnDomA1riXs?rel=0&modestbranding=1"
+              title="How Marbrest Stone Crafts Custom Marble — From Makrana Quarry to Your Project"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              loading="lazy"
+              style={{ width: '100%', aspectRatio: '16/9', border: 'none', borderRadius: '8px' }}
             />
           </div>
             {/* <div className="relative aspect-video bg-charcoal rounded-sm overflow-hidden shadow-2xl group">

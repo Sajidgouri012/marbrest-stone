@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import HeroSection from '@/components/home/HeroSection'
+import StatsBar from '@/components/home/StatsBar'
 import CraftsmanshipVideo from '@/components/home/CraftsmanshipVideo'
 import HeritageSection from '@/components/home/HeritageSection'
 import FeaturedProjects from '@/components/home/FeaturedProjects'
@@ -20,7 +20,8 @@ export default function Home() {
       <motion.div style={{ opacity, scale }}>
         <HeroSection />
       </motion.div>
-      
+
+      <StatsBar />
       <CraftsmanshipVideo />
       <HeritageSection />
       <FeaturedProjects />
