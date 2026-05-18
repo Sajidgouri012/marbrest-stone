@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { Check, Sparkles, Play, X, Eye, Filter, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import ProductDetailModal from '@/components/ProductDetailModal'
 
 interface ProductCategory {
@@ -223,32 +224,18 @@ export default function ProductsClient({
                     </button>
 
                     {showCategories && productCategories.map((category) => (
-                      <button
+                      <Link
                         key={category.slug}
-                        onClick={() => { setSelectedCategory(category.slug); setIsSidebarOpen(false) }}
-                        className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-between group ${
-                          selectedCategory === category.slug ? 'bg-gold text-charcoal shadow-md' : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                        href={`/products/${category.slug}`}
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="w-full text-left px-4 py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-between group text-gray-700 hover:bg-gray-100 hover:text-[#B8962E]"
                       >
                         <span>{category.name}</span>
-                        {selectedCategory === category.slug && <ChevronRight size={18} className="text-charcoal" />}
-                      </button>
+                        <ChevronRight size={18} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#B8962E]" />
+                      </Link>
                     ))}
                   </div>
 
-                  {selectedCategory !== 'all' && (
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Active Filter</p>
-                      <div className="flex items-center justify-between bg-gold/10 border border-gold/30 rounded-lg px-3 py-2">
-                        <span className="text-sm font-medium text-charcoal">
-                          {productCategories.find((t) => t.slug === selectedCategory)?.name}
-                        </span>
-                        <button onClick={() => setSelectedCategory('all')} className="text-charcoal hover:text-gold transition-colors">
-                          <X size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </aside>
