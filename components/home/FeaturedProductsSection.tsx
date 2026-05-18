@@ -112,8 +112,9 @@ export default function FeaturedProductsSection() {
               <div className="relative h-64 overflow-hidden">
                 <img
                   src={product.image_url}
-                  alt={product.name}
+                  alt={`${product.name} — premium marble product by Marbrest Stone`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>

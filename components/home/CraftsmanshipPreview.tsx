@@ -14,22 +14,26 @@ export default function CraftsmanshipPreview() {
     {
       url: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800',
       title: 'Hand Carving',
-      category: 'Crafting'
+      category: 'Crafting',
+      alt: 'Master artisan hand carving white Makrana marble, Marbrest Stone workshop'
     },
     {
       url: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?q=80&w=800',
       title: 'Flooring Work',
-      category: 'Installation'
+      category: 'Installation',
+      alt: 'Custom marble flooring installation for luxury hotel project by Marbrest Stone'
     },
     {
       url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=800',
       title: 'Temple Building',
-      category: 'Construction'
+      category: 'Construction',
+      alt: 'Marble temple construction and stone carving, Rajasthan India by Marbrest Stone'
     },
     {
       url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800',
       title: 'Polishing',
-      category: 'Finishing'
+      category: 'Finishing',
+      alt: 'Final polishing of custom marble slab by Marbrest Stone craftsmen'
     }
   ]
 
@@ -69,8 +73,9 @@ export default function CraftsmanshipPreview() {
             >
               <img
                 src={image.url}
-                alt={image.title}
+                alt={image.alt}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                loading="lazy"
               />
               
               {/* Overlay */}

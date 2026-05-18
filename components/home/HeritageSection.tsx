@@ -77,8 +77,9 @@ export default function HeritageSection() {
               <div className="absolute inset-0 bg-gradient-to-br from-gold/20 to-transparent rounded-sm" />
               <img
                 src="/crafting_sectioin_image.png"
-                alt="Luxury marble craftsmanship"
+                alt="Master artisan hand carving white Makrana marble, Marbrest Stone workshop, Rajasthan India"
                 className="w-full h-full object-contain rounded-sm shadow-2xl"
+                loading="lazy"
               />
               <div className="absolute -bottom-6 -right-6 w-48 h-48 bg-charcoal rounded-sm -z-10" />
               <div className="absolute -top-6 -left-6 w-48 h-48 border-2 border-gold rounded-sm -z-10" />

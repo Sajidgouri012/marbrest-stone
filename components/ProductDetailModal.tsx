@@ -168,8 +168,9 @@ export default function ProductDetailModal({
                     >
                       <img
                         src={images[selectedImageIndex]}
-                        alt={product.name}
+                        alt={`${product.name} — ${product.origin} marble by Marbrest Stone`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                       
                       {product.customizable && (
@@ -251,8 +252,9 @@ export default function ProductDetailModal({
                         >
                           <img
                             src={img}
-                            alt={`${product.name} ${idx + 1}`}
+                            alt={`${product.name} view ${idx + 1} — Marbrest Stone`}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                           />
                           {showVideoIcon && (
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

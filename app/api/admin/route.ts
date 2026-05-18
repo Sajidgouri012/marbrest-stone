@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
     const cleanData = data ? { ...data } : data
     if (cleanData) {
       delete cleanData.stone_type
+      delete cleanData.product_category
       delete cleanData.id
       delete cleanData.created_at
       delete cleanData.updated_at
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
         if (table === 'products') {
           result = await supabase
             .from(table)
-            .select('*, stone_type:stone_types(name)')
+            .select('*, product_category:products_categories(*)')
             .order('display_order', { ascending: true })
             .order('created_at', { ascending: false })
         } else if (table === 'stone_types') {

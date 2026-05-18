@@ -142,8 +142,9 @@ export default function FeaturedProjects() {
               <>
                 <img
                   src={projects[currentIndex].image_url}
-                  alt={projects[currentIndex].title}
+                  alt={`${projects[currentIndex].title} — marble installation by Marbrest Stone, ${projects[currentIndex].location}`}
                   className="w-full h-full object-contain"
+                  loading="lazy"
                 />
                 {projects[currentIndex].video_url && (
                   <button
