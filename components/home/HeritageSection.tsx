@@ -18,7 +18,7 @@ export default function HeritageSection() {
             transition={{ duration: 0.8 }}
           >
             <div className="mb-6">
-              <span className="text-[#B8962E] text-sm font-semibold tracking-widest uppercase">Our Heritage</span>
+              <span className="text-[#B8962E] text-sm font-semibold tracking-wider sm:tracking-widest uppercase">Our Heritage</span>
               <div className="h-px w-16 bg-[#B8962E] mt-2" />
             </div>
 

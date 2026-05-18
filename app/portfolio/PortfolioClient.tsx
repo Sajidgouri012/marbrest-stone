@@ -59,10 +59,10 @@ export default function PortfolioClient({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-6">
               600+ Completed Projects Across Luxury Hotels, Residences & Sacred Spaces
             </h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-300 max-w-2xl mx-auto">
               Explore our collection of luxury marble and stone installations from around the world
             </p>
           </motion.div>
@@ -255,8 +255,8 @@ function ProjectCard({
       </div>
 
       <div className="p-6">
-        <div className="text-gold text-xs font-semibold tracking-widest uppercase mb-2">{project.location}</div>
-        <h3 className="text-xl font-serif font-bold text-charcoal mb-2">{project.title}</h3>
+        <div className="text-gold text-xs font-semibold tracking-wider sm:tracking-widest uppercase mb-2">{project.location}</div>
+        <h3 className="text-lg sm:text-xl font-serif font-bold text-charcoal mb-2">{project.title}</h3>
         <p className="text-gray-600 text-sm leading-relaxed">{project.description}</p>
       </div>
     </motion.div>

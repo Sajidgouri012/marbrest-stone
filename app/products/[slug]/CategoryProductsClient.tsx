@@ -80,7 +80,7 @@ export default function CategoryProductsClient({
             transition={{ duration: 0.7 }}
           >
             <div className="mb-4">
-              <span className="inline-block px-3 py-1 bg-[#B8962E]/20 text-[#B8962E] text-xs font-semibold uppercase tracking-widest rounded-full">
+              <span className="inline-block px-3 py-1 bg-[#B8962E]/20 text-[#B8962E] text-xs font-semibold uppercase tracking-wider sm:tracking-widest rounded-full">
                 Marbrest Stone
               </span>
             </div>

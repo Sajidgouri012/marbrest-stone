@@ -24,7 +24,7 @@ export default function HeroSection() {
       <motion.div style={{ y }} className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal/60 via-charcoal/40 to-charcoal z-10" />
         <div
-          className="w-full h-full bg-cover bg-center"
+          className="w-full h-full bg-contain sm:bg-cover bg-no-repeat bg-center"
           style={{ backgroundImage: `url('/landing_page_image.png')` }}
         />
       </motion.div>

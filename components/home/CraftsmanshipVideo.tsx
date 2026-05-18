@@ -93,7 +93,7 @@ export default function CraftsmanshipVideo() {
                 <Hammer className="text-gold" size={24} />
               </div>
               <div>
-                <h3 className="text-xl font-serif font-bold text-charcoal mb-2">
+                <h3 className="text-base sm:text-lg lg:text-xl font-serif font-bold text-charcoal mb-2">
                   Handcrafted by Masters
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -108,7 +108,7 @@ export default function CraftsmanshipVideo() {
                 <Award className="text-gold" size={24} />
               </div>
               <div>
-                <h3 className="text-xl font-serif font-bold text-charcoal mb-2">
+                <h3 className="text-base sm:text-lg lg:text-xl font-serif font-bold text-charcoal mb-2">
                   Premium Makrana Marble
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -123,7 +123,7 @@ export default function CraftsmanshipVideo() {
                 <Users className="text-gold" size={24} />
               </div>
               <div>
-                <h3 className="text-xl font-serif font-bold text-charcoal mb-2">
+                <h3 className="text-base sm:text-lg lg:text-xl font-serif font-bold text-charcoal mb-2">
                   Trusted Worldwide
                 </h3>
                 <p className="text-gray-600 leading-relaxed">

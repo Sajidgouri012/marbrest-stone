@@ -63,11 +63,11 @@ export default function CraftsmanshipClient({ items }: { items: CraftsmanshipIte
               <span className="text-gold font-semibold text-sm">Behind the Scenes</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-bold mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-6">
               Master Craftsmanship: From Makrana Quarry to Your Project
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
               Witness the dedication, skill, and artistry that goes into every piece we create.
               From raw stone to masterpiece.
             </p>
@@ -76,22 +76,22 @@ export default function CraftsmanshipClient({ items }: { items: CraftsmanshipIte
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mt-12">
               <div className="text-center">
                 <Users className="text-gold mx-auto mb-2" size={32} />
-                <div className="text-3xl font-bold text-white mb-1">50+</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">50+</div>
                 <div className="text-sm text-gray-400">Skilled Craftsmen</div>
               </div>
               <div className="text-center">
                 <Award className="text-gold mx-auto mb-2" size={32} />
-                <div className="text-3xl font-bold text-white mb-1">30+</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">30+</div>
                 <div className="text-sm text-gray-400">Years Experience</div>
               </div>
               <div className="text-center">
                 <Hammer className="text-gold mx-auto mb-2" size={32} />
-                <div className="text-3xl font-bold text-white mb-1">600+</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">600+</div>
                 <div className="text-sm text-gray-400">Projects Completed</div>
               </div>
               <div className="text-center">
                 <Clock className="text-gold mx-auto mb-2" size={32} />
-                <div className="text-3xl font-bold text-white mb-1">100%</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">100%</div>
                 <div className="text-sm text-gray-400">Handcrafted</div>
               </div>
             </div>
@@ -204,10 +204,10 @@ export default function CraftsmanshipClient({ items }: { items: CraftsmanshipIte
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif font-bold mb-6">
               Ready to Start Your <span className="text-gold">Project?</span>
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-300 mb-8">
               Experience the same dedication and craftsmanship for your custom marble work.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -262,11 +262,11 @@ export default function CraftsmanshipClient({ items }: { items: CraftsmanshipIte
 
             <div className="mt-4 text-white text-center space-y-2">
               {selectedMedia.product_category && (
-                <h3 className="text-2xl font-bold">{selectedMedia.product_category}</h3>
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold">{selectedMedia.product_category}</h3>
               )}
               <div className="flex items-center justify-center gap-4 text-gray-300">
-                {selectedMedia.stone_type && <span className="text-lg">🪨 {selectedMedia.stone_type}</span>}
-                {selectedMedia.site_location && <span className="text-lg">📍 {selectedMedia.site_location}</span>}
+                {selectedMedia.stone_type && <span className="text-sm sm:text-base lg:text-lg">🪨 {selectedMedia.stone_type}</span>}
+                {selectedMedia.site_location && <span className="text-sm sm:text-base lg:text-lg">📍 {selectedMedia.site_location}</span>}
               </div>
             </div>
           </div>

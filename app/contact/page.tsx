@@ -69,7 +69,7 @@ export default function ContactPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-3xl font-serif font-bold text-charcoal mb-4">Message Received!</h2>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-serif font-bold text-charcoal mb-4">Message Received!</h2>
           <p className="text-gray-600 mb-6 leading-relaxed">
             ✓ We'll be in touch within 24 hours. For faster response, WhatsApp us directly:
           </p>
