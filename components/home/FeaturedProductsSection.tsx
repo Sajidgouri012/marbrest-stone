@@ -66,8 +66,8 @@ export default function FeaturedProductsSection() {
 
   if (loading) {
     return (
-      <section className="py-12 md:py-16 px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="py-12 md:py-16 bg-white">
+        <div className="container text-center">
           <div className="h-[400px] flex items-center justify-center">
             <div className="text-gray-400">Loading products...</div>
           </div>
@@ -81,25 +81,26 @@ export default function FeaturedProductsSection() {
   }
 
   return (
-    <section ref={ref} className="py-12 md:py-16 px-6 lg:px-8 bg-white">
-      <div className="max-w-7xl mx-auto">
+    <section ref={ref} id="products" className="py-12 md:py-16 bg-white">
+      <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-12 fade-up"
         >
-          <span className="text-gold text-sm font-semibold tracking-widest uppercase">Products & Services</span>
-          <div className="h-px w-16 bg-gold mx-auto mt-2 mb-6" />
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-charcoal mb-4">
-            Premium Stones & Craftsmanship
+          <span className="text-[#B8962E] text-sm font-semibold tracking-widest uppercase">Products &amp; Services</span>
+          <div className="h-px w-16 bg-[#B8962E] mx-auto mt-2 mb-6" />
+          <h2 className="font-serif font-bold text-charcoal mb-4">
+            Premium Stones &amp; Craftsmanship
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Natural stones, marble flooring, Mosque & temple artistry, carved handicrafts, home decor, and complete contract work
+            Natural stones, marble flooring, Mosque &amp; temple artistry, carved handicrafts, home decor, and complete contract work
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* 1 col → 2 col @640px → 3 col @1024px → 4 col @1280px */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
           {products.map((product, index) => (
             <motion.a
               key={product.id}
@@ -153,7 +154,7 @@ export default function FeaturedProductsSection() {
         >
           <a
             href="/products"
-            className="inline-flex items-center px-8 py-3 border-2 border-charcoal text-charcoal font-semibold tracking-wide hover:bg-charcoal hover:text-white transition-all duration-300 shadow-sm group"
+            className="inline-flex items-center px-8 py-3 border-2 border-charcoal text-charcoal font-semibold tracking-wide hover:bg-charcoal hover:text-white transition-all duration-300 shadow-sm group rounded-md"
           >
             VIEW ALL PRODUCTS
             <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />

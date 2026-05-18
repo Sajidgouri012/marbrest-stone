@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
+import FloatingElements from '@/components/FloatingElements'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.marbreststone.com'),
@@ -57,10 +58,12 @@ export default function RootLayout({
       </head>
       <body>
         <Navigation />
-        <main className="min-h-screen">
+        {/* mobile-bottom-bar-offset adds pb-[60px] on mobile to prevent content hiding behind the sticky CTA bar */}
+        <main className="min-h-screen mobile-bottom-bar-offset">
           {children}
         </main>
         <Footer />
+        <FloatingElements />
       </body>
     </html>
   )

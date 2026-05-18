@@ -81,8 +81,8 @@ export default function FeaturedProjects() {
 
   if (loading) {
     return (
-      <section className="py-12 md:py-16 px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="py-12 md:py-16 bg-gray-50">
+        <div className="container text-center">
           <div className="h-[600px] flex items-center justify-center">
             <div className="text-gray-400">Loading projects...</div>
           </div>
@@ -96,13 +96,13 @@ export default function FeaturedProjects() {
   }
 
   return (
-    <section ref={ref} className="py-12 md:py-16 px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+    <section ref={ref} id="portfolio" className="py-12 md:py-16 bg-gray-50">
+      <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-16 fade-up"
         >
           <span className="text-gold text-sm font-semibold tracking-widest uppercase">Portfolio</span>
           <div className="h-px w-16 bg-gold mx-auto mt-2 mb-6" />
