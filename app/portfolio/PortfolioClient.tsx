@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { Play, X } from 'lucide-react'
+import { Play, X, Eye, MapPin, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 
 interface Project {
   id: string
@@ -27,8 +27,7 @@ export default function PortfolioClient({
 }) {
   const [projects] = useState<Project[]>(initialProjects)
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
-  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   const categories = ['all', 'residential', 'commercial', 'hospitality', 'luxury']
 
@@ -36,22 +35,9 @@ export default function PortfolioClient({
     ? projects
     : projects.filter((p) => p.category === selectedCategory)
 
-  const getVideoEmbedUrl = (url: string) => {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.includes('youtu.be')
-        ? url.split('youtu.be/')[1]?.split('?')[0]
-        : url.split('v=')[1]?.split('&')[0]
-      return `https://www.youtube.com/embed/${videoId}`
-    }
-    if (url.includes('vimeo.com')) {
-      const videoId = url.split('vimeo.com/')[1]?.split('?')[0]
-      return `https://player.vimeo.com/video/${videoId}`
-    }
-    return url
-  }
-
   return (
     <div className="min-h-screen pt-20">
+      {/* Hero */}
       <section className="py-20 px-6 lg:px-8 bg-charcoal text-white">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
@@ -71,15 +57,16 @@ export default function PortfolioClient({
 
       <section className="py-16 px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
+          {/* Category filter */}
           {showCategories && (
-            <div className="flex flex-wrap justify-center gap-4 mb-12">
+            <div className="flex flex-wrap justify-center gap-3 mb-12">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-6 py-2 font-semibold tracking-wide uppercase text-sm transition-all duration-300 ${
+                  className={`px-5 py-2 rounded-full font-semibold text-xs uppercase tracking-wider transition-all duration-300 ${
                     selectedCategory === category
-                      ? 'bg-gold text-charcoal'
+                      ? 'bg-[#B8962E] text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -103,232 +90,302 @@ export default function PortfolioClient({
                 />
               </div>
               <div className="relative z-10 max-w-4xl mx-auto text-center">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-white mb-3 leading-tight">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-white mb-3 leading-tight">
                     Bring These Masterpieces to Your Space
                   </h2>
-                  <p className="text-base md:text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
-                    Premium stones, marble flooring, mosque & temple arts, carved handicrafts, and complete contract work for your projects
+                  <p className="text-sm sm:text-base text-gray-300 mb-6 max-w-2xl mx-auto">
+                    Premium stones, marble flooring, mosque & temple arts, carved handicrafts, and complete contract work
                   </p>
-                  <motion.a
+                  <a
                     href="/products"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="inline-flex items-center px-8 py-3 bg-gold text-charcoal font-semibold tracking-wide hover:bg-gold-light transition-all duration-300 shadow-lg hover:shadow-xl group"
+                    className="inline-flex items-center px-8 py-3 bg-[#B8962E] text-white font-semibold tracking-wide hover:bg-[#9A7D25] transition-all duration-300 shadow-lg hover:shadow-xl group text-sm"
                   >
                     EXPLORE OUR PRODUCTS
-                    <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </motion.a>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-
-          {/* Craftsmanship CTA Banner */}
-          <div className="mb-12 -mx-6 lg:-mx-8">
-            <div className="py-10 px-6 lg:px-8 bg-gradient-to-r from-gold/10 via-gold/5 to-gold/10 border-y border-gold/20 relative overflow-hidden">
-              <div className="relative z-10 max-w-4xl mx-auto text-center">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/20 border border-gold/40 rounded-full mb-3">
-                    <svg className="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-gold font-semibold text-xs uppercase tracking-wider">Behind the Scenes</span>
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-serif font-bold text-charcoal mb-2">
-                    See How We Create These Masterpieces
-                  </h3>
-                  <p className="text-sm md:text-base text-gray-600 mb-5 max-w-2xl mx-auto">
-                    Watch our skilled craftsmen at work — from raw stone to finished art
-                  </p>
-                  <motion.a
-                    href="/craftsmanship"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="inline-flex items-center px-6 py-2.5 bg-charcoal text-white font-semibold tracking-wide hover:bg-gold hover:text-charcoal transition-all duration-300 group text-sm"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                    VIEW OUR WORK PROCESS
                     <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
-                  </motion.a>
+                  </a>
                 </motion.div>
               </div>
             </div>
           </div>
 
+          {/* Project grid */}
           {filteredProjects.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-gray-600 text-lg">No projects found in this category.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-              {filteredProjects.map((project, index) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  index={index}
-                  onVideoClick={setSelectedVideo}
-                  onImageClick={(url, title) => setSelectedImage({ url, title })}
-                />
-              ))}
-            </div>
+            <>
+              <p className="text-sm text-gray-500 mb-6">
+                Showing <span className="font-semibold text-charcoal">{filteredProjects.length}</span>{' '}
+                {filteredProjects.length === 1 ? 'project' : 'projects'}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+                {filteredProjects.map((project, index) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={index}
+                    onClick={() => setSelectedProject(project)}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </section>
 
-      {selectedVideo && (
-        <VideoModal videoUrl={selectedVideo} onClose={() => setSelectedVideo(null)} getEmbedUrl={getVideoEmbedUrl} />
-      )}
-
-      {selectedImage && (
-        <ImageModal imageUrl={selectedImage.url} title={selectedImage.title} onClose={() => setSelectedImage(null)} />
+      {/* Project detail modal */}
+      {selectedProject && (
+        <ProjectDetailModal
+          project={selectedProject}
+          isOpen={!!selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
       )}
     </div>
   )
 }
 
+/* ── Project Card ─────────────────────────────────────────────────────────── */
 function ProjectCard({
   project,
   index,
-  onVideoClick,
-  onImageClick,
+  onClick,
 }: {
   project: Project
   index: number
-  onVideoClick: (url: string) => void
-  onImageClick: (url: string, title: string) => void
+  onClick: () => void
 }) {
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const isInView = useInView(ref, { once: true, margin: '-80px' })
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group relative overflow-hidden bg-white shadow-lg hover:shadow-2xl transition-all duration-300"
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
+      onClick={onClick}
+      className="group relative bg-white border border-gray-200 hover:border-[#B8962E] hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden rounded-lg"
     >
-      <div
-        className="relative h-80 overflow-hidden cursor-pointer"
-        onClick={() => !project.video_url && onImageClick(project.image_url, project.title)}
-      >
+      {/* Image */}
+      <div className="relative aspect-square overflow-hidden bg-gray-100">
         <img
           src={project.image_url}
           alt={`${project.title} — marble installation by Marbrest Stone, ${project.location}`}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {project.video_url && (
-          <>
-            <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center space-x-1.5 group-hover:opacity-0 transition-opacity duration-300">
-              <Play size={14} className="text-white" fill="white" />
-              <span className="text-white text-xs font-medium">Video</span>
-            </div>
-            <button
-              onClick={() => onVideoClick(project.video_url!)}
-              aria-label={`Play video for ${project.title}`}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gold text-charcoal p-4 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
-            >
-              <Play size={24} fill="currentColor" />
-            </button>
-          </>
-        )}
-      </div>
+        {/* Badges */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1">
+          {project.video_url && (
+            <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1">
+              <Play size={10} className="text-white" fill="white" />
+              <span className="text-white text-[10px] font-medium">VIDEO</span>
+            </span>
+          )}
+        </div>
 
-      <div className="p-6">
-        <div className="text-gold text-xs font-semibold tracking-wider sm:tracking-widest uppercase mb-2">{project.location}</div>
-        <h3 className="text-lg sm:text-xl font-serif font-bold text-charcoal mb-2">{project.title}</h3>
-        <p className="text-gray-600 text-sm leading-relaxed">{project.description}</p>
-      </div>
-    </motion.div>
-  )
-}
-
-function VideoModal({
-  videoUrl,
-  onClose,
-  getEmbedUrl,
-}: {
-  videoUrl: string
-  onClose: () => void
-  getEmbedUrl: (url: string) => string
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-      onClick={onClose}
-    >
-      <button onClick={onClose} className="absolute top-4 right-4 text-white hover:text-gold transition-colors">
-        <X size={32} />
-      </button>
-      <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
-        <iframe
-          src={getEmbedUrl(videoUrl)}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title="Marbrest Stone project video"
-        />
-      </div>
-    </motion.div>
-  )
-}
-
-function ImageModal({
-  imageUrl,
-  title,
-  onClose,
-}: {
-  imageUrl: string
-  title: string
-  onClose: () => void
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
-      onClick={onClose}
-    >
-      <button onClick={onClose} className="absolute top-4 right-4 text-white hover:text-gold transition-colors z-10">
-        <X size={32} />
-      </button>
-      <div className="relative flex items-center justify-center w-full h-full" onClick={(e) => e.stopPropagation()}>
-        <motion.img
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          src={imageUrl}
-          alt={`${title} — marble installation by Marbrest Stone`}
-          className="max-w-full max-h-[calc(100vh-8rem)] object-contain"
-        />
-        <div className="absolute bottom-4 left-4 right-4 bg-gradient-to-t from-black/80 to-transparent p-4 rounded">
-          <h3 className="text-white text-xl md:text-2xl font-serif font-bold">{title}</h3>
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-charcoal/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-white text-sm font-semibold">
+            <Eye size={18} />
+            <span>View Details</span>
+          </div>
         </div>
       </div>
+
+      {/* Card body */}
+      <div className="p-3">
+        <p className="text-[10px] text-[#B8962E] font-semibold uppercase tracking-wider mb-1">{project.location}</p>
+        <h3 className="font-semibold text-charcoal text-sm mb-1 line-clamp-2 group-hover:text-[#B8962E] transition-colors">
+          {project.title}
+        </h3>
+        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{project.description}</p>
+      </div>
     </motion.div>
+  )
+}
+
+/* ── Project Detail Modal ─────────────────────────────────────────────────── */
+function ProjectDetailModal({
+  project,
+  isOpen,
+  onClose,
+}: {
+  project: Project
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false)
+
+  const getVideoEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const videoId = url.includes('youtu.be')
+        ? url.split('youtu.be/')[1]?.split('?')[0]
+        : url.split('v=')[1]?.split('&')[0]
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`
+    }
+    if (url.includes('vimeo.com')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0]
+      return `https://player.vimeo.com/video/${videoId}?autoplay=1`
+    }
+    return url
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <AnimatePresence>
+      {/* Backdrop — anchors card to bottom on mobile, centres on sm+ */}
+      <motion.div
+        key="backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+        onClick={onClose}
+      >
+        {/* Card — bottom sheet on mobile, centred card on desktop */}
+        <motion.div
+          key="card"
+          initial={{ y: '100%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '100%', opacity: 0 }}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          className="bg-white w-full sm:max-w-4xl
+                     rounded-t-2xl sm:rounded-2xl
+                     shadow-2xl overflow-hidden
+                     max-h-[92vh] sm:max-h-[88vh]
+                     flex flex-col sm:flex-row
+                     relative"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 z-20 bg-white/90 backdrop-blur-sm rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition-colors"
+          >
+            <X size={18} className="text-charcoal" />
+          </button>
+
+          {/* Drag handle — mobile only */}
+          <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+            <div className="w-10 h-1 bg-gray-300 rounded-full" />
+          </div>
+
+          {/* Image — short banner on mobile, square half on desktop */}
+          <div className="relative bg-gray-100 flex-shrink-0 h-44 sm:h-auto sm:w-1/2 sm:aspect-square">
+            {isPlayingVideo && project.video_url ? (
+              <div className="relative w-full h-full">
+                <iframe
+                  src={getVideoEmbedUrl(project.video_url)}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={`${project.title} video`}
+                />
+                <button
+                  onClick={() => setIsPlayingVideo(false)}
+                  className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full transition-colors z-10"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="relative w-full h-full">
+                <img
+                  src={project.image_url}
+                  alt={`${project.title} — marble installation by Marbrest Stone, ${project.location}`}
+                  className="w-full h-full object-cover"
+                />
+                {project.video_url && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsPlayingVideo(true) }}
+                    className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/40 transition-colors group"
+                    aria-label="Play video"
+                  >
+                    <div className="bg-[#B8962E] text-white p-3 sm:p-4 rounded-full group-hover:scale-110 transition-transform shadow-xl">
+                      <Play size={22} fill="currentColor" />
+                    </div>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Details panel — scrollable */}
+          <div className="flex flex-col p-5 sm:p-6 overflow-y-auto flex-1 sm:w-1/2">
+            {/* Location + category */}
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              <span className="flex items-center gap-1 text-[#B8962E] text-xs font-semibold uppercase tracking-wider">
+                <MapPin size={12} />
+                {project.location}
+              </span>
+              {project.category && (
+                <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full capitalize">
+                  {project.category}
+                </span>
+              )}
+            </div>
+
+            {/* Title */}
+            <h2 className="font-serif font-bold text-charcoal text-xl sm:text-2xl mb-4 leading-snug">
+              {project.title}
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-600 text-sm leading-relaxed mb-5">
+              {project.description}
+            </p>
+
+            {/* Video hint */}
+            {project.video_url && !isPlayingVideo && (
+              <button
+                onClick={() => setIsPlayingVideo(true)}
+                className="flex items-center gap-2 text-xs font-semibold text-[#B8962E] hover:text-[#9A7D25] transition-colors mb-4"
+              >
+                <div className="w-6 h-6 rounded-full bg-[#B8962E]/10 flex items-center justify-center flex-shrink-0">
+                  <Play size={11} fill="currentColor" className="text-[#B8962E]" />
+                </div>
+                Watch project video
+              </button>
+            )}
+
+            {/* Push CTAs to bottom */}
+            <div className="flex-1" />
+
+            {/* CTAs */}
+            <div className="border-t border-gray-100 pt-4 space-y-3">
+              <a
+                href={`https://wa.me/918000485312?text=Hi%2C%20I%27m%20interested%20in%20a%20similar%20project%20to%20${encodeURIComponent(project.title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-white font-semibold text-sm rounded-md hover:bg-[#1daa54] transition-colors"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                Enquire on WhatsApp
+              </a>
+              <a
+                href="/contact"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-[#B8962E] text-white font-semibold text-sm rounded-md hover:bg-[#9A7D25] transition-colors"
+              >
+                <Sparkles size={16} />
+                Request a Similar Project
+              </a>
+              <p className="text-center text-xs text-gray-400">
+                ✓ Free Consultation &nbsp;✓ 24hr Response &nbsp;✓ No Commitment
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   )
 }

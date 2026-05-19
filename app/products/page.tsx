@@ -12,8 +12,6 @@ async function getData() {
 
   const showCategories = settingsResult.data?.value === 'true'
   const categories = categoriesResult.data ?? []
-  console.log('[DEBUG] showCategories:', showCategories)
-  console.log('[DEBUG] categories from Supabase:', categories.map((c: any) => ({ name: c.name, slug: c.slug })))
 
   const products = (productsResult.data ?? []).sort((a: any, b: any) => {
     const orderA = a.display_order ?? 999
