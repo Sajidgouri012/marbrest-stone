@@ -47,10 +47,13 @@ export async function generateCataloguePDF(
   const container = document.createElement('div')
   container.setAttribute('id', 'pdf-catalogue-container')
   container.style.cssText = `
-    position: fixed;
+    position: absolute;
     top: -99999px;
     left: -99999px;
     width: 794px;
+    min-width: 794px;
+    max-width: 794px;
+    overflow: visible;
     z-index: -9999;
     pointer-events: none;
   `
@@ -61,6 +64,11 @@ export async function generateCataloguePDF(
     ...buildProductPages(products),
     buildContactPage(),
   ].join('')
+
+  /* Force body to be at least 794px so the off-screen container lays out
+     at full width on narrow mobile viewports */
+  const prevBodyMinWidth = document.body.style.minWidth
+  document.body.style.minWidth = '794px'
 
   document.body.appendChild(container)
 
@@ -118,6 +126,7 @@ export async function generateCataloguePDF(
   pdf.save(`MarbrestStone_${label}_${today}.pdf`)
 
   document.body.removeChild(container)
+  document.body.style.minWidth = prevBodyMinWidth
   onProgress?.('Done!')
 }
 
@@ -199,9 +208,9 @@ function buildAboutPage(): string {
       ${stats
         .map(
           (s, i) => `
-        <div style="flex:1; padding:24px 16px; text-align:center; ${i < stats.length - 1 ? `border-right:1px solid ${C.lightGray};` : ''} background:${i % 2 === 0 ? C.white : C.offWhite};">
-          <div style="font-size:32px; font-weight:700; color:${C.gold}; line-height:1;">${s.num}</div>
-          <div style="font-size:10px; color:${C.gray}; margin-top:8px; letter-spacing:1px; text-transform:uppercase; white-space:pre-line; line-height:1.4;">${s.label}</div>
+        <div style="flex:1; min-width:0; padding:20px 8px; text-align:center; overflow:hidden; ${i < stats.length - 1 ? `border-right:1px solid ${C.lightGray};` : ''} background:${i % 2 === 0 ? C.white : C.offWhite};">
+          <div style="font-size:28px; font-weight:700; color:${C.gold}; line-height:1;">${s.num}</div>
+          <div style="font-size:9px; color:${C.gray}; margin-top:8px; letter-spacing:0.5px; text-transform:uppercase; white-space:pre-line; line-height:1.4;">${s.label}</div>
         </div>`
         )
         .join('')}
@@ -348,9 +357,9 @@ function buildPDFProductCard(p: PDFProduct): string {
       ${visibleSpecs.length > 0 ? `
       <div style="display:flex; flex-direction:column; gap:5px;">
         ${visibleSpecs.map(([label, val]) => `
-          <div style="display:flex; gap:8px; font-size:11px; line-height:1.6;">
+          <div style="display:flex; gap:8px; font-size:11px; line-height:1.6; overflow:hidden;">
             <span style="color:${C.midGray}; min-width:72px; flex-shrink:0;">${label}:</span>
-            <span style="color:${C.charcoal}; font-weight:600;">${val}</span>
+            <span style="color:${C.charcoal}; font-weight:600; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${val}</span>
           </div>`).join('')}
       </div>
       <div style="height:1px; background:${C.lightGray};"></div>
