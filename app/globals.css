@@ -152,6 +152,14 @@ footer {
     text-wrap: balance;
   }
 
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .fade-up {
     opacity: 0;
     transform: translateY(24px);

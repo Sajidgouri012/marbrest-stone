@@ -1,10 +1,14 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Eye, Play, X, ChevronRight, Sparkles } from 'lucide-react'
-import ProductDetailModal from '@/components/ProductDetailModal'
+import { X, ChevronRight, Sparkles, Heart } from 'lucide-react'
+import QuoteModal from '@/components/catalogue/QuoteModal'
+import ShortlistDrawer from '@/components/catalogue/ShortlistDrawer'
+import CatalogueFloatingActions from '@/components/catalogue/CatalogueFloatingActions'
+import type { CatalogueProduct } from '@/components/catalogue/ProductCard'
 
 interface ProductCategory {
   id: string
@@ -15,27 +19,6 @@ interface ProductCategory {
   visible: boolean
 }
 
-interface Product {
-  id: string
-  name: string
-  description: string
-  image_url: string
-  images?: string[]
-  video_url?: string
-  product_category_id: string
-  product_category?: ProductCategory
-  origin: string
-  features: string[]
-  customizable: boolean
-  visible: boolean
-  price_type: 'fixed' | 'range' | 'quote'
-  base_price?: number | null
-  min_price?: number | null
-  max_price?: number | null
-  price_unit?: string
-  whatsapp_link?: string | null
-}
-
 export default function CategoryProductsClient({
   category,
   initialProducts,
@@ -43,12 +26,32 @@ export default function CategoryProductsClient({
   currentSlug,
 }: {
   category: ProductCategory
-  initialProducts: Product[]
+  initialProducts: CatalogueProduct[]
   allCategories: ProductCategory[]
   currentSlug: string
 }) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [quoteOpen, setQuoteOpen] = useState(false)
+  const [quoteProduct, setQuoteProduct] = useState('')
+  const [shortlistOpen, setShortlistOpen] = useState(false)
+  const [shortlist, setShortlist] = useState<CatalogueProduct[]>(() => {
+    if (typeof window === 'undefined') return []
+    try { return JSON.parse(localStorage.getItem('marbrest_shortlist') || '[]') } catch { return [] }
+  })
+
+  const openQuote = useCallback((productName = '') => {
+    setQuoteProduct(productName)
+    setQuoteOpen(true)
+  }, [])
+
+  const toggleShortlist = useCallback((product: CatalogueProduct) => {
+    setShortlist((prev) => {
+      const exists = prev.find((p) => p.id === product.id)
+      const next = exists ? prev.filter((p) => p.id !== product.id) : [...prev, product]
+      try { localStorage.setItem('marbrest_shortlist', JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [])
 
   const filtered = initialProducts.filter((p) => {
     if (!searchQuery.trim()) return true
@@ -56,8 +59,8 @@ export default function CategoryProductsClient({
     return p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
   })
 
-  /* Other categories for the "Browse More" strip */
   const otherCategories = allCategories.filter((c) => c.slug !== currentSlug).slice(0, 8)
+  const shortlistIds = new Set(shortlist.map((p) => p.id))
 
   return (
     <div className="min-h-screen pt-16 lg:pt-20 pb-20 md:pb-0">
@@ -65,7 +68,6 @@ export default function CategoryProductsClient({
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section className="py-14 md:py-20 bg-charcoal text-white">
         <div className="container">
-          {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-gray-400 mb-6" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-[#B8962E] transition-colors">Home</Link>
             <ChevronRight size={14} />
@@ -84,13 +86,9 @@ export default function CategoryProductsClient({
                 Marbrest Stone
               </span>
             </div>
-            <h1 className="font-serif font-bold text-white mb-4 max-w-3xl">
-              {category.name}
-            </h1>
+            <h1 className="font-serif font-bold text-white mb-4 max-w-3xl">{category.name}</h1>
             {category.description && (
-              <p className="text-gray-300 max-w-2xl leading-relaxed">
-                {category.description}
-              </p>
+              <p className="text-gray-300 max-w-2xl leading-relaxed">{category.description}</p>
             )}
             <div className="flex flex-wrap gap-4 mt-8 text-sm text-gray-400">
               <span className="flex items-center gap-1.5">
@@ -135,10 +133,7 @@ export default function CategoryProductsClient({
               className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-lg text-charcoal placeholder-gray-400 focus:outline-none focus:border-[#B8962E] focus:ring-2 focus:ring-[#B8962E]/15 transition-all"
               style={{ fontSize: '16px' }}
             />
-            <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             {searchQuery && (
@@ -164,10 +159,7 @@ export default function CategoryProductsClient({
                   : `No products in this category yet.`}
               </p>
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-[#B8962E] hover:underline text-sm font-medium"
-                >
+                <button onClick={() => setSearchQuery('')} className="text-[#B8962E] hover:underline text-sm font-medium">
                   Clear search
                 </button>
               )}
@@ -188,7 +180,10 @@ export default function CategoryProductsClient({
                     key={product.id}
                     product={product}
                     index={index}
-                    onClick={() => setSelectedProduct(product)}
+                    categorySlug={currentSlug}
+                    isInShortlist={shortlistIds.has(product.id)}
+                    onToggleShortlist={toggleShortlist}
+                    onQuote={openQuote}
                   />
                 ))}
               </div>
@@ -202,18 +197,10 @@ export default function CategoryProductsClient({
         <section className="py-14 bg-[#F8F5F0]">
           <div className="container">
             <div className="text-center mb-8">
-              <h2 className="font-serif font-bold text-charcoal mb-2">
-                Explore More Categories
-              </h2>
-              <p className="text-gray-500 text-sm">
-                Browse our full range of Makrana marble products
-              </p>
+              <h2 className="font-serif font-bold text-charcoal mb-2">Explore More Categories</h2>
+              <p className="text-gray-500 text-sm">Browse our full range of Makrana marble products</p>
             </div>
-
-            {/* Horizontal scroll on mobile, wrap on desktop */}
-            <div className="flex gap-3 overflow-x-auto pb-3 md:flex-wrap md:justify-center scrollbar-hide"
-              style={{ scrollbarWidth: 'none' }}
-            >
+            <div className="flex gap-3 overflow-x-auto pb-3 md:flex-wrap md:justify-center scrollbar-none">
               {otherCategories.map((cat) => (
                 <Link
                   key={cat.slug}
@@ -248,13 +235,13 @@ export default function CategoryProductsClient({
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              <a
-                href="/contact"
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-[#B8962E] text-white font-semibold rounded-md hover:bg-[#9A7D25] transition-colors"
+              <button
+                onClick={() => openQuote()}
+                className="flex items-center justify-center gap-2 px-8 py-4 bg-[#B8962E] text-white font-semibold hover:bg-[#9A7D25] transition-colors"
               >
                 <Sparkles size={18} />
                 Request Custom Quote
-              </a>
+              </button>
               <p className="text-center text-gray-500 text-sm">
                 ✓ Free Consultation &nbsp;✓ 24hr Response &nbsp;✓ No Commitment
               </p>
@@ -263,14 +250,28 @@ export default function CategoryProductsClient({
         </div>
       </section>
 
-      {/* Product detail modal */}
-      {selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          isOpen={!!selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
+      <QuoteModal
+        isOpen={quoteOpen}
+        onClose={() => setQuoteOpen(false)}
+        prefilledProduct={quoteProduct}
+      />
+
+      <ShortlistDrawer
+        isOpen={shortlistOpen}
+        onClose={() => setShortlistOpen(false)}
+        shortlist={shortlist}
+        onRemove={toggleShortlist}
+        onQuoteAll={() => {
+          setShortlistOpen(false)
+          openQuote(shortlist.map((p) => p.name).join(', '))
+        }}
+      />
+
+      <CatalogueFloatingActions
+        shortlistCount={shortlist.length}
+        onOpenShortlist={() => setShortlistOpen(true)}
+        onOpenQuote={() => openQuote()}
+      />
     </div>
   )
 }
@@ -279,14 +280,22 @@ export default function CategoryProductsClient({
 function ProductCard({
   product,
   index,
-  onClick,
+  categorySlug,
+  isInShortlist,
+  onToggleShortlist,
+  onQuote,
 }: {
-  product: Product
+  product: CatalogueProduct
   index: number
-  onClick: () => void
+  categorySlug: string
+  isInShortlist: boolean
+  onToggleShortlist: (product: CatalogueProduct) => void
+  onQuote: (name: string) => void
 }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-80px' })
+  const router = useRouter()
+  const detailHref = `/products/${categorySlug}/${product.id}`
 
   const getPriceDisplay = () => {
     if (product.price_type === 'fixed' && product.base_price) {
@@ -295,8 +304,10 @@ function ProductCard({
     if (product.price_type === 'range' && product.min_price) {
       return `From ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.min_price)}`
     }
-    return 'Request Quote'
+    return null
   }
+
+  const priceDisplay = getPriceDisplay()
 
   return (
     <motion.div
@@ -304,11 +315,11 @@ function ProductCard({
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
-      onClick={onClick}
-      className="group relative bg-white border border-gray-200 hover:border-[#B8962E] hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden rounded-lg"
+      onClick={() => router.push(detailHref)}
+      className="group relative bg-white border border-gray-200 hover:border-[#B8962E] hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col rounded-lg cursor-pointer"
     >
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-gray-100">
+      <div className="relative aspect-square overflow-hidden bg-gray-100 flex-shrink-0">
         <img
           src={product.image_url}
           alt={`${product.name} — ${product.origin} marble by Marbrest Stone`}
@@ -317,39 +328,58 @@ function ProductCard({
           decoding="async"
         />
 
-        {/* Badges */}
-        <div className="absolute top-2 right-2 flex flex-col gap-1">
+        {/* Top right: badges + heart */}
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
           {product.customizable && (
-            <span className="bg-[#B8962E] px-2 py-0.5 rounded text-white text-[10px] font-bold">CUSTOM</span>
-          )}
-          {product.video_url && (
-            <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1">
-              <Play size={10} className="text-white" fill="white" />
-              <span className="text-white text-[10px] font-medium">VIDEO</span>
+            <span className="bg-[#B8962E] text-white text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-wide rounded">
+              CUSTOM
             </span>
           )}
-        </div>
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-charcoal/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-white text-sm font-semibold">
-            <Eye size={18} />
-            <span>View Details</span>
-          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleShortlist(product) }}
+            className={`w-7 h-7 flex items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 shadow-sm ${
+              isInShortlist ? 'bg-[#B8962E] text-white' : 'bg-white/90 text-gray-400 hover:text-[#B8962E]'
+            }`}
+            aria-label={isInShortlist ? 'Remove from shortlist' : 'Save to shortlist'}
+          >
+            <Heart size={14} fill={isInShortlist ? 'currentColor' : 'none'} />
+          </button>
         </div>
       </div>
 
       {/* Card body */}
-      <div className="p-3">
-        <h3 className="font-semibold text-charcoal text-sm mb-1 line-clamp-2 group-hover:text-[#B8962E] transition-colors">
+      <div className="p-3 flex flex-col flex-1">
+        <h3 className="font-semibold text-charcoal text-sm mb-1 line-clamp-2 group-hover:text-[#B8962E] transition-colors leading-snug">
           {product.name}
         </h3>
         <p className="text-xs text-gray-500 mb-2">{product.origin}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-bold text-charcoal">{getPriceDisplay()}</span>
-          {product.price_unit && product.price_type !== 'quote' && (
-            <span className="text-[10px] text-gray-400">{product.price_unit}</span>
-          )}
+        {priceDisplay && (
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-bold text-charcoal">{priceDisplay}</span>
+            {product.price_unit && product.price_type !== 'quote' && (
+              <span className="text-[10px] text-gray-400">{product.price_unit}</span>
+            )}
+          </div>
+        )}
+
+        <div className="flex-1" />
+
+        {/* Action buttons */}
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); onQuote(product.name) }}
+            className="flex-1 py-2 text-[11px] font-semibold bg-[#B8962E] text-white hover:bg-[#9A7D25] transition-colors"
+          >
+            Quick Quote
+          </button>
+          <Link
+            href={detailHref}
+            onClick={(e) => e.stopPropagation()}
+            className="px-3 py-2 text-[11px] font-semibold border border-gray-300 text-gray-700 hover:border-[#B8962E] hover:text-[#B8962E] transition-colors flex items-center"
+            title="View product details"
+          >
+            ↗
+          </Link>
         </div>
       </div>
     </motion.div>

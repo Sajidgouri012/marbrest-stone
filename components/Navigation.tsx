@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/portfolio', label: 'Portfolio' },
   { href: '/craftsmanship', label: 'Craftsmanship' },
   { href: '/products', label: 'Products' },
+  { href: '/catalogue', label: 'Catalogue' },
   { href: '/testimonials', label: 'Testimonials' },
   { href: '/contact', label: 'Contact' },
 ]
@@ -76,13 +77,13 @@ export default function Navigation() {
                   key={link.href}
                   href={link.href}
                   className={`text-sm font-medium uppercase tracking-[0.08em] transition-colors duration-200 relative group ${linkColor} ${
-                    pathname === link.href ? '!text-[#B8962E]' : ''
+                    (link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)) ? '!text-[#B8962E]' : ''
                   }`}
                 >
                   {link.label}
                   <span
                     className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-[#B8962E] transition-transform origin-left ${
-                      pathname === link.href ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      (link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                     }`}
                   />
                 </Link>
@@ -206,7 +207,7 @@ export default function Navigation() {
                       href={link.href}
                       onClick={closeMenu}
                       className={`block py-3 text-base font-serif font-medium border-b border-white/10 transition-colors ${
-                        pathname === link.href ? 'text-[#B8962E]' : 'text-white hover:text-[#B8962E]'
+                        (link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)) ? 'text-[#B8962E]' : 'text-white hover:text-[#B8962E]'
                       }`}
                     >
                       {link.label}
