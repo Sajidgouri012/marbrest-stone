@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef } from 'react'
-import { Check, Sparkles, Play, X, Eye, Filter, ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Check, Sparkles, X, Filter, ChevronRight, Heart } from 'lucide-react'
 import Link from 'next/link'
-import ProductDetailModal from '@/components/ProductDetailModal'
+import QuoteModal from '@/components/catalogue/QuoteModal'
+import ShortlistDrawer from '@/components/catalogue/ShortlistDrawer'
+import CatalogueFloatingActions from '@/components/catalogue/CatalogueFloatingActions'
+import type { CatalogueProduct } from '@/components/catalogue/ProductCard'
 
 interface ProductCategory {
   id: string
@@ -17,72 +20,53 @@ interface ProductCategory {
   visible: boolean
 }
 
-interface Product {
-  id: string
-  name: string
-  description: string
-  image_url: string
-  images?: string[]
-  video_url?: string
-  product_category_id: string
-  product_category?: ProductCategory
-  origin: string
-  features: string[]
-  customizable: boolean
-  visible: boolean
-  price_type: 'fixed' | 'range' | 'quote'
-  base_price?: number | null
-  min_price?: number | null
-  max_price?: number | null
-  price_unit?: string
-  whatsapp_link?: string | null
-}
-
 export default function ProductsClient({
   initialProducts,
   initialCategories,
   initialShowCategories,
 }: {
-  initialProducts: Product[]
+  initialProducts: CatalogueProduct[]
   initialCategories: ProductCategory[]
   initialShowCategories: boolean
 }) {
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [productCategories] = useState<ProductCategory[]>(initialCategories)
-  const [products] = useState<Product[]>(initialProducts)
-  const [showCategories] = useState(initialShowCategories)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [quoteOpen, setQuoteOpen] = useState(false)
+  const [quoteProduct, setQuoteProduct] = useState('')
+  const [shortlistOpen, setShortlistOpen] = useState(false)
+  const [shortlist, setShortlist] = useState<CatalogueProduct[]>(() => {
+    if (typeof window === 'undefined') return []
+    try { return JSON.parse(localStorage.getItem('marbrest_shortlist') || '[]') } catch { return [] }
+  })
 
-  const filteredProducts = products.filter((p) => {
+  const openQuote = useCallback((productName = '') => {
+    setQuoteProduct(productName)
+    setQuoteOpen(true)
+  }, [])
+
+  const toggleShortlist = useCallback((product: CatalogueProduct) => {
+    setShortlist((prev) => {
+      const exists = prev.find((p) => p.id === product.id)
+      const next = exists ? prev.filter((p) => p.id !== product.id) : [...prev, product]
+      try { localStorage.setItem('marbrest_shortlist', JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [])
+
+  const filteredProducts = initialProducts.filter((p) => {
     if (selectedCategory !== 'all') {
-      const category = productCategories.find((t) => t.id === p.product_category_id)
+      const category = initialCategories.find((t) => t.id === p.product_category_id)
       if (category?.slug !== selectedCategory) return false
     }
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
-      return (
-        p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query)
-      )
+      return p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query)
     }
     return true
   })
 
-  const getVideoEmbedUrl = (url: string) => {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const videoId = url.includes('youtu.be')
-        ? url.split('youtu.be/')[1]?.split('?')[0]
-        : url.split('v=')[1]?.split('&')[0]
-      return `https://www.youtube.com/embed/${videoId}`
-    }
-    if (url.includes('vimeo.com')) {
-      const videoId = url.split('vimeo.com/')[1]?.split('?')[0]
-      return `https://player.vimeo.com/video/${videoId}`
-    }
-    return url
-  }
+  const shortlistIds = new Set(shortlist.map((p) => p.id))
 
   return (
     <div className="min-h-screen pt-20">
@@ -117,65 +101,48 @@ export default function ProductsClient({
 
       {/* Custom Design Message */}
       <section className="py-8 px-6 lg:px-8 bg-gradient-to-r from-gold/5 to-gold/10 border-y border-gold/20">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <p className="text-lg md:text-xl text-charcoal leading-relaxed">
-              <span className="font-semibold text-gold">Note:</span> All these products are available, but we also create{' '}
-              <span className="font-semibold text-charcoal">custom designs</span> based on your choice of{' '}
-              <span className="font-semibold text-charcoal">pattern, design, and stone type</span>.{' '}
-              Whether you need a unique piece or modifications to existing designs, our master craftsmen can bring your vision to life.
-            </p>
-            <div className="mt-4 flex flex-wrap justify-center gap-3">
-              <a
-                href="/contact"
-                className="inline-flex items-center gap-2 px-6 py-2 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all duration-300 text-sm"
-              >
-                <Sparkles size={16} />
-                Request Custom Design
-              </a>
-            </div>
-          </motion.div>
+        <div className="max-w-5xl mx-auto text-center">
+          <p className="text-lg md:text-xl text-charcoal leading-relaxed">
+            <span className="font-semibold text-gold">Note:</span> All these products are available, but we also create{' '}
+            <span className="font-semibold text-charcoal">custom designs</span> based on your choice of{' '}
+            <span className="font-semibold text-charcoal">pattern, design, and stone type</span>.
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-2 px-6 py-2 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all duration-300 text-sm"
+            >
+              <Sparkles size={16} />
+              Request Custom Design
+            </a>
+          </div>
         </div>
       </section>
 
       {/* Search Bar and Filter Button */}
-      <section className="py-8 px-6 lg:px-8 bg-gray-50 border-b border-gray-200">
+      <section className="py-6 px-6 lg:px-8 bg-gray-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto">
           <div className="flex gap-4 items-center">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden flex items-center gap-2 px-4 py-4 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all duration-300 whitespace-nowrap"
+              className="lg:hidden flex items-center gap-2 px-4 py-3.5 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all duration-300 whitespace-nowrap"
             >
-              <Filter size={20} />
+              <Filter size={18} />
               <span>Filters</span>
             </button>
-
             <div className="flex-1 relative">
               <input
                 type="text"
                 placeholder={
                   selectedCategory === 'all'
                     ? 'Search all products...'
-                    : `Search in ${productCategories.find((t) => t.slug === selectedCategory)?.name || 'category'}...`
+                    : `Search in ${initialCategories.find((t) => t.slug === selectedCategory)?.name || 'category'}...`
                 }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-6 py-4 pr-12 border-2 border-gray-300 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none text-charcoal placeholder-gray-400"
+                className="w-full px-6 py-3.5 pr-12 border-2 border-gray-300 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none text-charcoal placeholder-gray-400"
               />
-              <svg
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
@@ -187,6 +154,7 @@ export default function ProductsClient({
       <section className="py-8 px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex gap-8">
+            {/* Sidebar */}
             <aside
               className={`${
                 isSidebarOpen ? 'fixed inset-0 z-50 bg-black/50' : 'hidden'
@@ -200,18 +168,13 @@ export default function ProductsClient({
                 {isSidebarOpen && (
                   <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200 bg-charcoal text-white">
                     <h3 className="text-sm font-semibold">Filter Products</h3>
-                    <button
-                      onClick={() => setIsSidebarOpen(false)}
-                      className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                    >
+                    <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                       <X size={24} />
                     </button>
                   </div>
                 )}
-
                 <div className="p-4 lg:p-0">
                   <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3 hidden lg:block">Categories</h3>
-
                   <div className="space-y-1">
                     <button
                       onClick={() => { setSelectedCategory('all'); setIsSidebarOpen(false) }}
@@ -222,8 +185,7 @@ export default function ProductsClient({
                       <span>All Products</span>
                       {selectedCategory === 'all' && <ChevronRight size={16} className="text-charcoal" />}
                     </button>
-
-                    {showCategories && productCategories.map((category) => (
+                    {initialShowCategories && initialCategories.map((category) => (
                       <Link
                         key={category.slug}
                         href={`/products/${category.slug}`}
@@ -235,7 +197,6 @@ export default function ProductsClient({
                       </Link>
                     ))}
                   </div>
-
                 </div>
               </div>
             </aside>
@@ -247,7 +208,7 @@ export default function ProductsClient({
                   <span className="font-semibold text-charcoal">{filteredProducts.length}</span>
                   {' '}{filteredProducts.length === 1 ? 'product' : 'products'}
                   {selectedCategory !== 'all' && (
-                    <span> in <span className="font-semibold text-gold">{productCategories.find((t) => t.slug === selectedCategory)?.name}</span></span>
+                    <span> in <span className="font-semibold text-gold">{initialCategories.find((t) => t.slug === selectedCategory)?.name}</span></span>
                   )}
                   {searchQuery && (
                     <span> matching &ldquo;<span className="font-semibold text-charcoal">{searchQuery}</span>&rdquo;</span>
@@ -274,7 +235,9 @@ export default function ProductsClient({
                       key={product.id}
                       product={product}
                       index={index}
-                      onProductClick={() => setSelectedProduct(product)}
+                      isInShortlist={shortlistIds.has(product.id)}
+                      onToggleShortlist={toggleShortlist}
+                      onQuote={openQuote}
                     />
                   ))}
                 </div>
@@ -312,57 +275,74 @@ export default function ProductsClient({
         </div>
       </section>
 
-      {selectedVideo && (
-        <VideoModal videoUrl={selectedVideo} onClose={() => setSelectedVideo(null)} getEmbedUrl={getVideoEmbedUrl} />
-      )}
+      <QuoteModal
+        isOpen={quoteOpen}
+        onClose={() => setQuoteOpen(false)}
+        prefilledProduct={quoteProduct}
+      />
 
-      {selectedProduct && (
-        <ProductDetailModal product={selectedProduct} isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} />
-      )}
+      <ShortlistDrawer
+        isOpen={shortlistOpen}
+        onClose={() => setShortlistOpen(false)}
+        shortlist={shortlist}
+        onRemove={toggleShortlist}
+        onQuoteAll={() => {
+          setShortlistOpen(false)
+          openQuote(shortlist.map((p) => p.name).join(', '))
+        }}
+      />
+
+      <CatalogueFloatingActions
+        shortlistCount={shortlist.length}
+        onOpenShortlist={() => setShortlistOpen(true)}
+        onOpenQuote={() => openQuote()}
+      />
     </div>
   )
 }
 
+/* ── Product Card ─────────────────────────────────────────────────────────── */
 function ProductCard({
   product,
   index,
-  onProductClick,
+  isInShortlist,
+  onToggleShortlist,
+  onQuote,
 }: {
-  product: Product
+  product: CatalogueProduct
   index: number
-  onProductClick: () => void
+  isInShortlist: boolean
+  onToggleShortlist: (product: CatalogueProduct) => void
+  onQuote: (name: string) => void
 }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(price)
-  }
+  const router = useRouter()
+  const categorySlug = product.product_category?.slug ?? ''
 
   const getPriceDisplay = () => {
     if (product.price_type === 'fixed' && product.base_price) {
-      return formatPrice(product.base_price)
-    } else if (product.price_type === 'range' && product.min_price) {
-      return `From ${formatPrice(product.min_price)}`
-    } else {
-      return 'Request Quote'
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.base_price)
     }
+    if (product.price_type === 'range' && product.min_price) {
+      return `From ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.min_price)}`
+    }
+    return 'Request Quote'
   }
+
+  const detailHref = categorySlug ? `/products/${categorySlug}/${product.id}` : null
 
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      onClick={onProductClick}
-      className="group relative bg-white border border-gray-200 hover:border-gold hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.3) }}
+      onClick={() => detailHref && router.push(detailHref)}
+      className="group relative bg-white border border-gray-200 hover:border-[#B8962E] hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col cursor-pointer"
     >
-      <div className="relative aspect-square overflow-hidden bg-gray-100">
+      {/* Image */}
+      <div className="relative aspect-square overflow-hidden bg-gray-100 flex-shrink-0">
         <img
           src={product.image_url}
           alt={`${product.name} — ${product.origin} marble by Marbrest Stone`}
@@ -370,70 +350,59 @@ function ProductCard({
           loading="lazy"
         />
 
-        <div className="absolute top-2 right-2 flex flex-col gap-1">
+        {/* Top right: badges + heart */}
+        <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
           {product.customizable && (
-            <div className="bg-gold px-2 py-0.5 rounded text-charcoal text-[10px] font-bold">CUSTOM</div>
+            <span className="bg-[#B8962E] text-white text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-wide">
+              CUSTOM
+            </span>
           )}
-          {product.video_url && (
-            <div className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1">
-              <Play size={10} className="text-white" fill="white" />
-              <span className="text-white text-[10px] font-medium">VIDEO</span>
-            </div>
-          )}
-        </div>
-
-        <div className="absolute inset-0 bg-charcoal/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-white text-sm font-semibold">
-            <Eye size={18} />
-            <span>View Details</span>
-          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleShortlist(product) }}
+            className={`w-7 h-7 flex items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 shadow-sm ${
+              isInShortlist ? 'bg-[#B8962E] text-white' : 'bg-white/90 text-gray-400 hover:text-[#B8962E]'
+            }`}
+            aria-label={isInShortlist ? 'Remove from shortlist' : 'Save to shortlist'}
+          >
+            <Heart size={14} fill={isInShortlist ? 'currentColor' : 'none'} />
+          </button>
         </div>
       </div>
 
-      <div className="p-3">
-        <h3 className="font-semibold text-charcoal text-sm mb-1 line-clamp-2 group-hover:text-gold transition-colors">
+      {/* Card body */}
+      <div className="p-3 flex flex-col flex-1">
+        <h3 className="font-semibold text-charcoal text-sm mb-1 line-clamp-2 group-hover:text-[#B8962E] transition-colors leading-snug">
           {product.name}
         </h3>
         <p className="text-xs text-gray-500 mb-2">{product.origin}</p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-bold text-charcoal">{getPriceDisplay()}</span>
           {product.price_unit && product.price_type !== 'quote' && (
-            <span className="text-[10px] text-gray-500">{product.price_unit}</span>
+            <span className="text-[10px] text-gray-400">{product.price_unit}</span>
           )}
         </div>
-      </div>
-    </motion.div>
-  )
-}
 
-function VideoModal({
-  videoUrl,
-  onClose,
-  getEmbedUrl,
-}: {
-  videoUrl: string
-  onClose: () => void
-  getEmbedUrl: (url: string) => string
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-      onClick={onClose}
-    >
-      <button onClick={onClose} className="absolute top-4 right-4 text-white hover:text-gold transition-colors">
-        <X size={32} />
-      </button>
-      <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
-        <iframe
-          src={getEmbedUrl(videoUrl)}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title="Marbrest Stone product video"
-        />
+        <div className="flex-1" />
+
+        {/* Action buttons */}
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); onQuote(product.name) }}
+            className="flex-1 py-2 text-[11px] font-semibold bg-[#B8962E] text-white hover:bg-[#9A7D25] transition-colors"
+          >
+            Quick Quote
+          </button>
+          {detailHref && (
+            <Link
+              href={detailHref}
+              onClick={(e) => e.stopPropagation()}
+              className="px-3 py-2 text-[11px] font-semibold border border-gray-300 text-gray-700 hover:border-[#B8962E] hover:text-[#B8962E] transition-colors flex items-center"
+              title="View product details"
+            >
+              ↗
+            </Link>
+          )}
+        </div>
       </div>
     </motion.div>
   )
