@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useCallback, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { ChevronRight, Heart, ChevronLeft } from 'lucide-react'
+import { ChevronRight, Heart, ChevronLeft, Play, X, ZoomIn } from 'lucide-react'
 import QuoteModal from '@/components/catalogue/QuoteModal'
 
 interface ProductCategory {
@@ -54,11 +54,33 @@ interface Props {
   relatedProducts: RelatedProduct[]
 }
 
+type MediaItem = { type: 'image'; url: string } | { type: 'video'; url: string }
+
 const FINISH_KEYWORDS = ['polished', 'honed', 'brushed', 'sand-blasted', 'matte', 'glossy', 'finish']
+
+function getVideoEmbed(url: string): string | null {
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&rel=0`
+  const vimeo = url.match(/vimeo\.com\/(\d+)/)
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1`
+  return null // direct file — handled by <video> tag
+}
+
+function getYoutubeThumbnail(url: string): string | null {
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)
+  if (yt) return `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`
+  return null
+}
 
 export default function ProductDetailClient({ product, categorySlug, relatedProducts }: Props) {
   const allImages = [product.image_url, ...(product.images ?? [])].filter(Boolean)
-  const [activeImg, setActiveImg] = useState(0)
+  const mediaItems: MediaItem[] = [
+    ...allImages.map((url) => ({ type: 'image' as const, url })),
+    ...(product.video_url ? [{ type: 'video' as const, url: product.video_url }] : []),
+  ]
+
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const [quoteOpen, setQuoteOpen] = useState(false)
   const [inShortlist, setInShortlist] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -67,6 +89,27 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
       return saved.some((p: any) => p.id === product.id)
     } catch { return false }
   })
+
+  const activeItem = mediaItems[activeIndex]
+
+  /* Close lightbox on Escape */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false)
+      if (lightboxOpen) {
+        if (e.key === 'ArrowLeft') setActiveIndex((i) => (i - 1 + allImages.length) % allImages.length)
+        if (e.key === 'ArrowRight') setActiveIndex((i) => (i + 1) % allImages.length)
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [lightboxOpen, allImages.length])
+
+  /* Lock scroll when lightbox open */
+  useEffect(() => {
+    document.body.style.overflow = lightboxOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [lightboxOpen])
 
   const toggleShortlist = useCallback(() => {
     setInShortlist((prev: boolean) => {
@@ -81,6 +124,9 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
     })
   }, [product])
 
+  const prevMedia = () => setActiveIndex((i) => (i - 1 + mediaItems.length) % mediaItems.length)
+  const nextMedia = () => setActiveIndex((i) => (i + 1) % mediaItems.length)
+
   const finishPills = product.features.filter((f) =>
     FINISH_KEYWORDS.some((k) => f.toLowerCase().includes(k))
   )
@@ -92,8 +138,8 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
   const waMsg = `Hi Marbrest Stone! I'm interested in the product "${product.name}" (${product.origin}). Please share more details on pricing and availability.`
   const waHref = product.whatsapp_link ?? `https://wa.me/918000485312?text=${encodeURIComponent(waMsg)}`
 
-  const prevImg = () => setActiveImg((i) => (i - 1 + allImages.length) % allImages.length)
-  const nextImg = () => setActiveImg((i) => (i + 1) % allImages.length)
+  const embedUrl = product.video_url ? getVideoEmbed(product.video_url) : null
+  const ytThumb = product.video_url ? getYoutubeThumbnail(product.video_url) : null
 
   return (
     <div className="min-h-screen pt-16 lg:pt-20">
@@ -118,34 +164,68 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
 
-          {/* ── Image gallery ── */}
+          {/* ── Media gallery ── */}
           <div>
-            {/* Main image */}
+            {/* Main display */}
             <div className="relative aspect-square bg-gray-100 overflow-hidden mb-3">
-              <motion.img
-                key={activeImg}
-                src={allImages[activeImg]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.25 }}
-              />
 
-              {/* Nav arrows (only if multiple images) */}
-              {allImages.length > 1 && (
+              {activeItem.type === 'image' ? (
+                <>
+                  <motion.img
+                    key={`img-${activeIndex}`}
+                    src={activeItem.url}
+                    alt={product.name}
+                    className="w-full h-full object-cover cursor-zoom-in"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.25 }}
+                    onClick={() => setLightboxOpen(true)}
+                  />
+                  {/* Zoom hint */}
+                  <div className="absolute bottom-3 left-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded flex items-center gap-1 pointer-events-none">
+                    <ZoomIn size={11} />
+                    Click to enlarge
+                  </div>
+                </>
+              ) : (
+                /* Video player */
+                <div className="w-full h-full bg-black flex items-center justify-center">
+                  {embedUrl ? (
+                    <iframe
+                      key={`video-${activeIndex}`}
+                      src={embedUrl}
+                      className="w-full h-full"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title={`${product.name} video`}
+                    />
+                  ) : (
+                    /* Direct video file */
+                    <video
+                      key={`video-${activeIndex}`}
+                      src={activeItem.url}
+                      controls
+                      autoPlay
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+              )}
+
+              {/* Nav arrows */}
+              {mediaItems.length > 1 && (
                 <>
                   <button
-                    onClick={prevImg}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white shadow flex items-center justify-center transition-all"
-                    aria-label="Previous image"
+                    onClick={prevMedia}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white shadow flex items-center justify-center transition-all z-10"
+                    aria-label="Previous"
                   >
                     <ChevronLeft size={18} />
                   </button>
                   <button
-                    onClick={nextImg}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white shadow flex items-center justify-center transition-all"
-                    aria-label="Next image"
+                    onClick={nextMedia}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white shadow flex items-center justify-center transition-all z-10"
+                    aria-label="Next"
                   >
                     <ChevronRight size={18} />
                   </button>
@@ -155,7 +235,7 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
               {/* Shortlist button */}
               <button
                 onClick={toggleShortlist}
-                className={`absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full shadow backdrop-blur-sm transition-all ${
+                className={`absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full shadow backdrop-blur-sm transition-all z-10 ${
                   inShortlist ? 'bg-[#B8962E] text-white' : 'bg-white/90 text-gray-400 hover:text-[#B8962E]'
                 }`}
                 aria-label={inShortlist ? 'Remove from shortlist' : 'Save to shortlist'}
@@ -163,35 +243,68 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
                 <Heart size={16} fill={inShortlist ? 'currentColor' : 'none'} />
               </button>
 
-              {/* Image counter */}
-              {allImages.length > 1 && (
-                <span className="absolute bottom-3 right-3 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded-full">
-                  {activeImg + 1} / {allImages.length}
+              {/* Counter */}
+              {mediaItems.length > 1 && (
+                <span className="absolute bottom-3 right-3 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded-full z-10">
+                  {activeIndex + 1} / {mediaItems.length}
                 </span>
               )}
             </div>
 
-            {/* Thumbnails */}
-            {allImages.length > 1 && (
+            {/* Thumbnail strip */}
+            {mediaItems.length > 1 && (
               <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
-                {allImages.map((img, i) => (
+                {mediaItems.map((item, i) => (
                   <button
                     key={i}
-                    onClick={() => setActiveImg(i)}
-                    className={`flex-shrink-0 w-16 h-16 border-2 overflow-hidden transition-all ${
-                      i === activeImg ? 'border-[#B8962E]' : 'border-transparent hover:border-gray-300'
+                    onClick={() => setActiveIndex(i)}
+                    className={`flex-shrink-0 w-16 h-16 border-2 overflow-hidden transition-all relative ${
+                      i === activeIndex ? 'border-[#B8962E]' : 'border-transparent hover:border-gray-300'
                     }`}
+                    aria-label={item.type === 'video' ? 'View video' : `View image ${i + 1}`}
                   >
-                    <img src={img} alt={`${product.name} view ${i + 1}`} className="w-full h-full object-cover" />
+                    {item.type === 'image' ? (
+                      <img
+                        src={item.url}
+                        alt={`${product.name} view ${i + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      /* Video thumbnail */
+                      <div className="w-full h-full bg-gray-900 relative">
+                        {ytThumb ? (
+                          <img src={ytThumb} alt="Video thumbnail" className="w-full h-full object-cover opacity-70" />
+                        ) : (
+                          <div className="w-full h-full bg-black" />
+                        )}
+                        {/* Play icon overlay */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="w-6 h-6 bg-[#B8962E] rounded-full flex items-center justify-center">
+                            <Play size={10} className="text-white ml-0.5" fill="currentColor" />
+                          </div>
+                          <span className="text-[8px] text-white font-bold mt-1 uppercase tracking-wide">Video</span>
+                        </div>
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
+            )}
+
+            {/* Video badge below gallery (only when product has video) */}
+            {product.video_url && (
+              <button
+                onClick={() => setActiveIndex(mediaItems.length - 1)}
+                className="mt-3 flex items-center gap-2 text-xs font-semibold text-[#B8962E] hover:underline"
+              >
+                <Play size={13} fill="currentColor" />
+                Watch product video
+              </button>
             )}
           </div>
 
           {/* ── Product info ── */}
           <div className="flex flex-col">
-            {/* Category + customizable badge */}
             <div className="flex items-center gap-2 mb-3">
               {categoryName && (
                 <Link
@@ -216,7 +329,6 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
               Origin: <span className="font-semibold text-charcoal">{product.origin}</span>
             </p>
 
-            {/* Finish pills */}
             {finishPills.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-5">
                 {finishPills.map((f) => (
@@ -230,13 +342,11 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
               </div>
             )}
 
-            {/* Description */}
             <p className="text-sm text-gray-600 leading-relaxed mb-6">{product.description}</p>
 
-            {/* Features list */}
             {otherFeatures.length > 0 && (
               <div className="mb-6">
-                <p className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Features & Specifications</p>
+                <p className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Features &amp; Specifications</p>
                 <ul className="space-y-1.5">
                   {otherFeatures.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
@@ -250,7 +360,6 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
 
             <div className="h-px bg-gray-200 my-5" />
 
-            {/* Trust signals */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               {[
                 { icon: '🚢', label: 'Export Ready', sub: '30+ countries' },
@@ -268,7 +377,6 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
               ))}
             </div>
 
-            {/* CTA buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setQuoteOpen(true)}
@@ -352,6 +460,74 @@ export default function ProductDetailClient({ product, categorySlug, relatedProd
           </div>
         </section>
       )}
+
+      {/* ── Lightbox ── */}
+      <AnimatePresence>
+        {lightboxOpen && activeItem.type === 'image' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+            onClick={() => setLightboxOpen(false)}
+          >
+            {/* Close */}
+            <button
+              className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
+              onClick={() => setLightboxOpen(false)}
+              aria-label="Close"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Prev / Next (images only in lightbox) */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setActiveIndex((i) => (i - 1 + allImages.length) % allImages.length)
+                  }}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors z-10"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setActiveIndex((i) => (i + 1) % allImages.length)
+                  }}
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={22} />
+                </button>
+              </>
+            )}
+
+            {/* Image */}
+            <motion.img
+              key={activeIndex}
+              src={activeItem.url}
+              alt={product.name}
+              className="max-w-[90vw] max-h-[90vh] object-contain select-none"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Counter */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs">
+                {activeIndex + 1} / {allImages.length}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <QuoteModal
         isOpen={quoteOpen}

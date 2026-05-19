@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Check, Sparkles, X, Filter, ChevronRight, Heart } from 'lucide-react'
+import { Check, Sparkles, X, Filter, ChevronRight, Heart, Play } from 'lucide-react'
 import Link from 'next/link'
 import QuoteModal from '@/components/catalogue/QuoteModal'
 import ShortlistDrawer from '@/components/catalogue/ShortlistDrawer'
@@ -349,6 +349,14 @@ function ProductCard({
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
+
+        {/* Video badge — bottom left */}
+        {product.video_url && (
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">
+            <Play size={8} fill="currentColor" />
+            Video
+          </div>
+        )}
 
         {/* Top right: badges + heart */}
         <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
