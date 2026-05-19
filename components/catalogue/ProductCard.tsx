@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Heart } from 'lucide-react'
+import { Heart, Play } from 'lucide-react'
 import Link from 'next/link'
 
 export interface CatalogueProduct {
@@ -116,6 +116,14 @@ export default function ProductCard({
           >
             {categoryName}
           </button>
+        )}
+
+        {/* Video badge — bottom left */}
+        {product.video_url && (
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide">
+            <Play size={8} fill="currentColor" />
+            Video
+          </div>
         )}
 
         {/* Top right: CUSTOM badge + heart */}
