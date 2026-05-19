@@ -57,8 +57,8 @@ export default function ContactPage() {
   }
 
   /* Shared input class — 16px font size is CRITICAL to prevent iOS zoom */
-  const inputClass = `w-full px-4 border border-[#E0D8CF] rounded-lg outline-none transition-all duration-200 text-charcoal placeholder-gray-400 focus:border-[#B8962E] focus:shadow-[0_0_0_3px_rgba(184,150,46,0.15)]`
-  const inputStyle = { minHeight: '52px', fontSize: '16px', paddingTop: '14px', paddingBottom: '14px' }
+  const inputClass = `w-full px-3 sm:px-4 py-2.5 sm:py-3.5 border border-[#E0D8CF] rounded-lg outline-none transition-all duration-200 text-charcoal placeholder-gray-400 focus:border-[#B8962E] focus:shadow-[0_0_0_3px_rgba(184,150,46,0.15)]`
+  const inputStyle = { fontSize: '16px' } /* keeps iOS from zooming on focus */
 
   if (status === 'success') {
     return (
@@ -400,15 +400,15 @@ export default function ContactPage() {
                     onChange={handleChange}
                     placeholder="Tell us about your project..."
                     className={inputClass}
-                    style={{ fontSize: '16px', resize: 'vertical', paddingTop: '14px', paddingBottom: '14px' }}
+                    style={{ fontSize: '16px', resize: 'vertical' }}
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={status === 'sending'}
-                  className="w-full bg-[#B8962E] text-white font-semibold hover:bg-[#9A7D25] transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
-                  style={{ height: '56px', fontSize: '1rem' }}
+                  className="w-full h-12 sm:h-14 bg-[#B8962E] text-white font-semibold hover:bg-[#9A7D25] transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
+                  style={{ fontSize: '1rem' }}
                 >
                   {status === 'sending' ? (
                     <>

@@ -125,7 +125,7 @@ export default function ProductsClient({
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <p className="text-lg md:text-xl text-charcoal leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg text-charcoal leading-relaxed">
               <span className="font-semibold text-gold">Note:</span> All these products are available, but we also create{' '}
               <span className="font-semibold text-charcoal">custom designs</span> based on your choice of{' '}
               <span className="font-semibold text-charcoal">pattern, design, and stone type</span>.{' '}
@@ -150,9 +150,9 @@ export default function ProductsClient({
           <div className="flex gap-4 items-center">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden flex items-center gap-2 px-4 py-4 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all duration-300 whitespace-nowrap"
+              className="lg:hidden flex items-center gap-2 px-4 py-2.5 sm:py-3.5 bg-gold text-charcoal font-semibold hover:bg-gold-light transition-all duration-300 whitespace-nowrap text-sm sm:text-base"
             >
-              <Filter size={20} />
+              <Filter size={18} />
               <span>Filters</span>
             </button>
 
@@ -166,7 +166,8 @@ export default function ProductsClient({
                 }
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-6 py-4 pr-12 border-2 border-gray-300 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none text-charcoal placeholder-gray-400"
+                className="w-full px-4 sm:px-6 py-2.5 sm:py-3.5 pr-10 sm:pr-12 border-2 border-gray-300 focus:border-gold focus:ring-2 focus:ring-gold/20 outline-none text-charcoal placeholder-gray-400 text-sm sm:text-base"
+                style={{ fontSize: '16px' }}
               />
               <svg
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"

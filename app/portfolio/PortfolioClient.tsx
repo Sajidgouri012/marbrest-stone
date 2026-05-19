@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useDragControls } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { Play, X, Eye, MapPin, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
@@ -222,6 +222,7 @@ function ProjectDetailModal({
   onClose: () => void
 }) {
   const [isPlayingVideo, setIsPlayingVideo] = useState(false)
+  const dragControls = useDragControls()
 
   const getVideoEmbedUrl = (url: string) => {
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -257,6 +258,14 @@ function ProjectDetailModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          drag="y"
+          dragControls={dragControls}
+          dragListener={false}
+          dragConstraints={{ top: 0 }}
+          dragElastic={{ top: 0, bottom: 0.3 }}
+          onDragEnd={(_, info) => {
+            if (info.offset.y > 80 || info.velocity.y > 500) onClose()
+          }}
           className="bg-white w-full sm:max-w-4xl
                      rounded-t-2xl sm:rounded-2xl
                      shadow-2xl overflow-hidden
@@ -273,13 +282,16 @@ function ProjectDetailModal({
             <X size={18} className="text-charcoal" />
           </button>
 
-          {/* Drag handle — mobile only */}
-          <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          {/* Drag handle — mobile only; touch it to drag the sheet down */}
+          <div
+            className="sm:hidden flex justify-center pt-3 pb-2 flex-shrink-0 touch-none cursor-grab active:cursor-grabbing select-none"
+            onPointerDown={(e) => dragControls.start(e)}
+          >
             <div className="w-10 h-1 bg-gray-300 rounded-full" />
           </div>
 
-          {/* Image — short banner on mobile, square half on desktop */}
-          <div className="relative bg-gray-100 flex-shrink-0 h-44 sm:h-auto sm:w-1/2 sm:aspect-square">
+          {/* Image — tall banner on mobile, square half on desktop */}
+          <div className="relative bg-gray-100 flex-shrink-0 h-56 sm:h-auto sm:w-1/2 sm:aspect-square">
             {isPlayingVideo && project.video_url ? (
               <div className="relative w-full h-full">
                 <iframe
